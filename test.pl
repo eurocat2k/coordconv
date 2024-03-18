@@ -5,21 +5,32 @@ use Data::Dumper;
 use FindBin;
 use lib "$FindBin::Bin";
 use Stereo;
+use CoordConv;
+use Vector3D;
+use Matrix3D;
+use Math::Trig;
 
-my ($lon, $lat) = (19.18, 47.35);
-my $s0 = Stereo->new();
-my $s1 = Stereo->new($lon, $lat);
-my $xy0 = $s0->forward($lat, $lon);
-my $xy1 = $s1->forward($lon, $lat);
-print Dumper ({s0 => $s0, s1 => $s1});
-print Dumper ({forward0 => $s0->forward($lon, $lat)});
-print Dumper ({forward1 => $s1->forward($lon, $lat)});
+my ($lon, $lat, $elev) = (19.18, 47.35, 440);
+my $cc = CoordConv->new($lon, $lat, $elev);
+my $vec = Vector3D->new(-123, 123, -232);
+my $mt = Matrix3D->new([[1,2,3],[4,5,6],[7,8,9]]);
+print Dumper {vector => $vec};
+print Dumper ($vec->Length(), rad2deg$vec->Ang());
+print Dumper $mt * $mt;
+# print Dumper $cc;
+# my $s0 = Stereo->new();
+# my $s1 = Stereo->new($lon, $lat);
+# my $xy0 = $s0->forward($lat, $lon);
+# my $xy1 = $s1->forward($lon, $lat);
+# print Dumper ({s0 => $s0, s1 => $s1});
+# print Dumper ({forward0 => $s0->forward($lon, $lat)});
+# print Dumper ({forward1 => $s1->forward($lon, $lat)});
 
-print Dumper({inverse1 => $s1->inverse(0,0)});
-print Dumper ({s0 => $s0});
+# print Dumper({inverse1 => $s1->inverse(0,0)});
+# print Dumper ({s0 => $s0});
 
-print Dumper({inverse1 => $s1->inverse(0,0)});
-print Dumper({inverse0 => $s0->inverse($xy0->{x},$xy0->{y})});
+# print Dumper({inverse1 => $s1->inverse(0,0)});
+# print Dumper({inverse0 => $s0->inverse($xy0->{x},$xy0->{y})});
 
 # print Dumper $s1, $xy, $s1->params;
 # print "The original geo coordinates\n";
