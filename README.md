@@ -22,13 +22,17 @@ Both methods expect two arguments.
 
 Expects two argument: *longitude* and *latitude* in degrees, in this order.
     
-    Note: the valid range of longitude are: [-180..180], the latitude range is [-90..90]. Negative values in case of longitudes mean western coordinates - coords toward west from Greenwich Meridian -, mean while negative latitudes mean southern - below the Equator - coordinates.
+    Note: the valid range of longitude are: [-180..180], the latitude range is [-90..90]. 
+    Negative values in case of longitudes mean western coordinates - coords toward west from 
+    Greenwich Meridian -, mean while negative latitudes mean southern - below the Equator - coordinates.
 
 ### sub inverse($$)
 
 Expects two arguments: *X* and *Y* in meters, in this order. *X* and *Y* coordinates mean the distance from conversion's center.
 
-    Note: The chartesian coordinate system orientation aligned East to right, North to up, West to left, and South to down. So, in case of negative *X* value gives geographic coordinate's longitude toward West from the coordinate conversion's center longitude value.
+    Note: The chartesian coordinate system orientation aligned East to right, North to up, 
+    West to left, and South to down. So, in case of negative *X* value gives geographic 
+    coordinate's longitude toward West from the coordinate conversion's center longitude value.
 
     Same as negative *Y*, the latitude result goes southward from the center latitude.
 
