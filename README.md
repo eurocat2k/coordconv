@@ -1,6 +1,6 @@
 # coordconv
 
-Geographic coordinates conversion module - stereographic conversion implemented usin WGS84 ellipse parameters.
+Geographic coordinates conversion module - stereographic conversion implemented using WGS84 ellipse parameters.
 
 ## NAME
 
