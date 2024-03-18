@@ -31,30 +31,7 @@ my $false = 0;
 my $true = 1;
 my $NaN = POSIX::nan();
 # Params
-my $params = {
-    SYS_CENTER_LAT => $SYS_CENTER_LAT,
-    SYS_CENTER_LON => $SYS_CENTER_LON,
-    x0 => 0,
-    y0 => 0,
-    lat0 => 0,
-    lon0 => 0,
-    lat1 => 0,
-    k0 => 1,
-    axis => 'enu',
-    ellps => 'wgs84',
-    a => 0,
-    a => 0,
-    es => 0,
-    e => 0,
-    ep2 => 0,
-    sinlat0 => 0,
-    coslat0 => 0,
-    cons => 0,
-    ms1 => 0,
-    X0 => 0,
-    cosX0 => 0,
-    sinX0 => 0
-};
+my $params;
 # Predefinitions
 sub phi2z($$);
 sub sign($);
@@ -62,15 +39,44 @@ sub sphere($$$$$);
 # Constructor
 sub new {
     my $inv = shift;
+    my ($lon, $lat) = @_;
+    print Dumper ("PARAMS", @_);
     my $class = ref($inv) || $inv;
-    if (@_ eq 2) {
-        my ($lon, $lat) = @_;
-        $params->{SYS_CENTER_LAT} = $lat unless not looks_like_number($lat);
-        $params->{SYS_CENTER_LON} = $lon unless not looks_like_number($lon);
-    }
-    my $self = {};
+    my $self = {
+        params => {
+            SYS_CENTER_LAT => 0,
+            SYS_CENTER_LON => 0,
+            x0 => 0,
+            y0 => 0,
+            lat0 => 0,
+            lon0 => 0,
+            lat1 => 0,
+            k0 => 1,
+            axis => 'enu',
+            ellps => 'wgs84',
+            a => 0,
+            a => 0,
+            es => 0,
+            e => 0,
+            ep2 => 0,
+            sinlat0 => 0,
+            coslat0 => 0,
+            cons => 0,
+            ms1 => 0,
+            X0 => 0,
+            cosX0 => 0,
+            sinX0 => 0
+        }
+    };
     bless($self, $class);
-    $self->_init();
+    if (defined $lon and defined $lat) {
+        print "USING CUSTOM CENTER\n";
+        $self->_init($lon, $lat);
+    } else {
+        print "USING DEFAULT CENTER\n";
+        $self->_init($SYS_CENTER_LON, $SYS_CENTER_LAT);
+    }
+    print Dumper $self;
     return $self;
 }
 sub sign($) {
@@ -85,54 +91,57 @@ sub sys_center_lat {
     my $self = shift;
     if (@_) {
         my $lat = shift;
-        $params->{SYS_CENTER_LAT} = $lat unless not looks_like_number($lat);    # otherwise keep the original value for latitude of the system center
+        $self->{params}->{SYS_CENTER_LAT} = $lat unless not looks_like_number($lat);    # otherwise keep the original value for latitude of the system center
     }
-    return $params->{SYS_CENTER_LAT};
+    return $self->{params}->{SYS_CENTER_LAT};
 }
 sub sys_center_lon {
     my $self = shift;
     if (@_) {
         my $lon = shift;
-        $params->{SYS_CENTER_LON} = $lon unless not looks_like_number($lon);    # otherwise keep the original value for longitude of the system center
+        $self->{params}->{SYS_CENTER_LON} = $lon unless not looks_like_number($lon);    # otherwise keep the original value for longitude of the system center
     }
-    return $params->{SYS_CENTER_LON};
+    return $self->{params}->{SYS_CENTER_LON};
 }
 sub params {
     return $params;
 }
 sub _init {
     my $self = shift;
-    $params->{x0} = $params->{x0} || 0;
-    $params->{y0} = $params->{y0} || 0;
-    $params->{lat0} = $params->{lat0} || deg2rad($params->{SYS_CENTER_LAT});
-    $params->{lon0} = $params->{lon0} || deg2rad($params->{SYS_CENTER_LON});
-    $params->{axis} = 'enu';
-    $params->{ellps} = 'wgs84';
-    $params->{k0} = $params->{k0} || 1.0;
-    $params->{lat1} = $params->{lat1} || $params->{lat0};
-    $params->{a} = sphere(Wgs84::wgs84->{a}, undef, Wgs84::wgs84->{rf}, 'wgs84', $false)->{a};
-    $params->{b} = sphere(Wgs84::wgs84->{a}, undef, Wgs84::wgs84->{rf}, 'wgs84', $false)->{b};
-    $params->{es} = eccentricity($params->{a}, $params->{b}, $params->{rf})->{es};
-    $params->{e} = eccentricity($params->{a}, $params->{b}, $params->{rf})->{e};
-    $params->{ep2} = eccentricity($params->{a}, $params->{b}, $params->{rf})->{ep2};
-    $params->{coslat0} = cos($params->{lat0});
-    $params->{sinlat0} = sin($params->{lat0});
-    if (abs($params->{coslat0}) <= $EPSLN) {
-        if ($params->{lat0} > 0) {
+    my ($lon, $lat) = @_;
+    $self->{params}->{SYS_CENTER_LAT} = $lat;
+    $self->{params}->{SYS_CENTER_LON} = $lon;
+    $self->{params}->{x0} = $self->{params}->{x0} || 0;
+    $self->{params}->{y0} = $self->{params}->{y0} || 0;
+    $self->{params}->{lat0} = deg2rad($self->{params}->{SYS_CENTER_LAT});
+    $self->{params}->{lon0} = deg2rad($self->{params}->{SYS_CENTER_LON});
+    $self->{params}->{axis} = 'enu';
+    $self->{params}->{ellps} = 'wgs84';
+    $self->{params}->{k0} = $self->{params}->{k0} || 1.0;
+    $self->{params}->{lat1} = $self->{params}->{lat1} || $self->{params}->{lat0};
+    $self->{params}->{a} = sphere(Wgs84::wgs84->{a}, undef, Wgs84::wgs84->{rf}, 'wgs84', $false)->{a};
+    $self->{params}->{b} = sphere(Wgs84::wgs84->{a}, undef, Wgs84::wgs84->{rf}, 'wgs84', $false)->{b};
+    $self->{params}->{es} = eccentricity($self->{params}->{a}, $self->{params}->{b}, $self->{params}->{rf})->{es};
+    $self->{params}->{e} = eccentricity($self->{params}->{a}, $self->{params}->{b}, $self->{params}->{rf})->{e};
+    $self->{params}->{ep2} = eccentricity($self->{params}->{a}, $self->{params}->{b}, $self->{params}->{rf})->{ep2};
+    $self->{params}->{coslat0} = cos($self->{params}->{lat0});
+    $self->{params}->{sinlat0} = sin($self->{params}->{lat0});
+    if (abs($self->{params}->{coslat0}) <= $EPSLN) {
+        if ($self->{params}->{lat0} > 0) {
             # North pole
             # trace('stere:north pole');
-            $params->{con} = 1;
+            $self->{params}->{con} = 1;
         } else {
             # South pole
             # trace('stere:south pole');
-            $params->{con} = -1;
+            $self->{params}->{con} = -1;
         }
     }
-    $params->{cons} = sqrt(pow(1 + $params->{e}, 1 + $params->{e}) * pow(1 - $params->{e}, 1 - $params->{e}));
-    $params->{ms1} = msfnz($params->{e}, $params->{sinlat0}, $params->{coslat0});
-    $params->{X0} = 2 * atan(ssfn_($params->{lat0}, $params->{sinlat0}, $params->{e})) - (pip2);
-    $params->{cosX0} = cos($params->{X0});
-    $params->{sinX0} = sin($params->{X0});
+    $self->{params}->{cons} = sqrt(pow(1 + $self->{params}->{e}, 1 + $self->{params}->{e}) * pow(1 - $self->{params}->{e}, 1 - $self->{params}->{e}));
+    $self->{params}->{ms1} = msfnz($self->{params}->{e}, $self->{params}->{sinlat0}, $self->{params}->{coslat0});
+    $self->{params}->{X0} = 2 * atan(ssfn_($self->{params}->{lat0}, $self->{params}->{sinlat0}, $self->{params}->{e})) - (pip2);
+    $self->{params}->{cosX0} = cos($self->{params}->{X0});
+    $self->{params}->{sinX0} = sin($self->{params}->{X0});
 }
 # sphere
 sub sphere($$$$$) {
@@ -246,63 +255,63 @@ sub forward($$) {
     my $ts;
     my $rh;
     my $p = {x => 0, y => 0};
-    my $dlon = adjust_lon($lon - $params->{lon0});
-    if (abs(abs($lon - $params->{lon0}) - pi) <= $EPSLN and abs($lat + $params->{lat0}) <= $EPSLN) {
+    my $dlon = adjust_lon($lon - $self->{params}->{lon0});
+    if (abs(abs($lon - $self->{params}->{lon0}) - pi) <= $EPSLN and abs($lat + $self->{params}->{lat0}) <= $EPSLN) {
         # case of the origine point
         # trace('stere:this is the origin point');
         # p.x = NaN;
         # p.y = NaN;
         return {x => $NaN, y => $NaN};
     }
-    if ($params->{sphere}) {
+    if ($self->{params}->{sphere}) {
         # trace('stere:sphere case');
-        $A = 2 * $params->{k0} / (1 + $params->{sinlat0} * $sinlat + $params->{coslat0} * {$coslat} * cos($dlon));
+        $A = 2 * $self->{params}->{k0} / (1 + $self->{params}->{sinlat0} * $sinlat + $self->{params}->{coslat0} * {$coslat} * cos($dlon));
         #  p.x = this.a * A * coslat * sin(dlon) + this.x0;
         #  p.y = this.a * A * (this.coslat0 * sinlat - this.sinlat0 * coslat * cos(dlon)) + this.y0;
         return {
-            x => $params->{a} * $A * $coslat * sin($dlon) + $params->{x0},
-            y => $params->{a} * $A * ($params->{coslat0} * $sinlat - $params->{sinlat0} * $coslat * cos($dlon)) + $params->{y0}
+            x => $self->{params}->{a} * $A * $coslat * sin($dlon) + $self->{params}->{x0},
+            y => $self->{params}->{a} * $A * ($self->{params}->{coslat0} * $sinlat - $self->{params}->{sinlat0} * $coslat * cos($dlon)) + $self->{params}->{y0}
         };
     } else {
-        $X = 2 * atan(ssfn_($lat, $sinlat, $params->{e})) - pip2;
+        $X = 2 * atan(ssfn_($lat, $sinlat, $self->{params}->{e})) - pip2;
         $cosX = cos($X);
         $sinX = sin($X);
-        if (abs($params->{coslat0}) <= $EPSLN) {
-            $ts = tsfnz($params->{e}, $lat * $params->{con}, $params->{con} * $sinlat);
-            $rh = 2 * $params->{a} * $params->{k0} * $ts / $params->{cons};
+        if (abs($self->{params}->{coslat0}) <= $EPSLN) {
+            $ts = tsfnz($self->{params}->{e}, $lat * $self->{params}->{con}, $self->{params}->{con} * $sinlat);
+            $rh = 2 * $self->{params}->{a} * $self->{params}->{k0} * $ts / $self->{params}->{cons};
             #  p.x = this.x0 + rh * sin(lon - this.lon0);
             #  p.y = this.y0 - this.con * rh * cos(lon - this.lon0);
             # trace(p.toString());
             return {
-                x => $params->{x0} + $rh * sin($lon - $params->{lon0}),
-                y => $params->{y0} - $params->{con} * $rh * cos($lon - $params->{lon0})
+                x => $self->{params}->{x0} + $rh * sin($lon - $self->{params}->{lon0}),
+                y => $self->{params}->{y0} - $self->{params}->{con} * $rh * cos($lon - $self->{params}->{lon0})
             };
-        } elsif (abs($params->{sinlat0}) < $EPSLN) {
+        } elsif (abs($self->{params}->{sinlat0}) < $EPSLN) {
             # Eq
             # trace('stere:equateur');
-            $A = 2 * $params->{a} * $params->{k0} / (1 + $cosX * cos($dlon));
+            $A = 2 * $self->{params}->{a} * $self->{params}->{k0} / (1 + $cosX * cos($dlon));
             $p->{y} = $A * $sinX;
         } else {
             # other case
             # trace('stere:normal case');
-            $A = 2 * $params->{a} * $params->{k0} * $params->{ms1} / ($params->{cosX0} * (1 + $params->{sinX0} * $sinX + $params->{cosX0} * $cosX * cos($dlon)));
-            $p->{y} = $A * ($params->{cosX0} * $sinX - $params->{sinX0} * $cosX * cos($dlon)) + $params->{y0};
+            $A = 2 * $self->{params}->{a} * $self->{params}->{k0} * $self->{params}->{ms1} / ($self->{params}->{cosX0} * (1 + $self->{params}->{sinX0} * $sinX + $self->{params}->{cosX0} * $cosX * cos($dlon)));
+            $p->{y} = $A * ($self->{params}->{cosX0} * $sinX - $self->{params}->{sinX0} * $cosX * cos($dlon)) + $self->{params}->{y0};
         }
-        $p->{x} = $A * $cosX * sin($dlon) + $params->{x0};
+        $p->{x} = $A * $cosX * sin($dlon) + $self->{params}->{x0};
     }
     return $p;
 }
 sub inverse($$) {
     my $self = shift;
     my ($x, $y) = @_;
-    $x -= $params->{x0};
-    $y -= $params->{y0};
+    $x -= $self->{params}->{x0};
+    $y -= $self->{params}->{y0};
     my ($lon, $lat, $ts, $ce, $Chi);
     my $rh = sqrt($x * $x + $y * $y);
-    if ($params->{sphere}) {
-        my $c = 2 * atan($rh / (2 * $params->{a} * $params->{k0}));
-        $lon = $params->{lon0};
-        $lat = $params->{lat0};
+    if ($self->{params}->{sphere}) {
+        my $c = 2 * atan($rh / (2 * $self->{params}->{a} * $self->{params}->{k0}));
+        $lon = $self->{params}->{lon0};
+        $lat = $self->{params}->{lat0};
         if ($rh <= $EPSLN) {
             # p.x = lon;
             # p.y = lat;
@@ -311,15 +320,15 @@ sub inverse($$) {
                 lon => rad2deg($lon), lat => rad2deg($lat)
             };
         }
-        $lat = asin(cos($c) * $params->{sinlat0} + $y * sin($c) * $params->{coslat0} / $rh);
-        if (abs($params->{coslat0}) < $EPSLN) {
-            if ($params->{lat0} > 0) {
-                $lon = adjust_lon($params->{lon0} + atan2($x, -1 * $y));
+        $lat = asin(cos($c) * $self->{params}->{sinlat0} + $y * sin($c) * $self->{params}->{coslat0} / $rh);
+        if (abs($self->{params}->{coslat0}) < $EPSLN) {
+            if ($self->{params}->{lat0} > 0) {
+                $lon = adjust_lon($self->{params}->{lon0} + atan2($x, -1 * $y));
             } else {
-                $lon = adjust_lon($params->{lon0} + atan2($x, $y));
+                $lon = adjust_lon($self->{params}->{lon0} + atan2($x, $y));
             }
         } else {
-            $lon = adjust_lon($params->{lon0} + atan2($x * sin($c), $rh * $params->{coslat0} * cos($c) - $y * $params->{sinlat0} * sin($c)));
+            $lon = adjust_lon($self->{params}->{lon0} + atan2($x * sin($c), $rh * $self->{params}->{coslat0} * cos($c) - $y * $self->{params}->{sinlat0} * sin($c)));
         }
         # p.x = lon;
         # p.y = lat;
@@ -328,31 +337,31 @@ sub inverse($$) {
             lon => rad2deg($lon), lat => rad2deg($lat)
         };
     } else {
-        if (abs($params->{coslat0}) <= $EPSLN) {
+        if (abs($self->{params}->{coslat0}) <= $EPSLN) {
             if ($rh <= $EPSLN) {
-                $lat = $params->{lat0};
-                $lon = $params->{lon0};
+                $lat = $self->{params}->{lat0};
+                $lon = $self->{params}->{lon0};
                 # trace(p.toString());
                 # return p;
                 return {
                     lon => rad2deg($lon), lat => rad2deg($lat)
                 };
             }
-            $x *= $params->{con};
-            $y *= $params->{con};
-            $ts = $rh * $params->{cons} / (2 * $params->{a} * $params->{k0});
-            $lat = $params->{con} * phi2z($params->{e}, $ts);
-            $lon = $params->{con} * adjust_lon($params->{con} * $params->{lon0} + atan2($x, -1 * $y));
+            $x *= $self->{params}->{con};
+            $y *= $self->{params}->{con};
+            $ts = $rh * $self->{params}->{cons} / (2 * $self->{params}->{a} * $self->{params}->{k0});
+            $lat = $self->{params}->{con} * phi2z($self->{params}->{e}, $ts);
+            $lon = $self->{params}->{con} * adjust_lon($self->{params}->{con} * $self->{params}->{lon0} + atan2($x, -1 * $y));
         } else {
-            $ce = 2 * atan($rh * $params->{cosX0} / (2 * $params->{a} * $params->{k0} * $params->{ms1}));
-            $lon = $params->{lon0};
+            $ce = 2 * atan($rh * $self->{params}->{cosX0} / (2 * $self->{params}->{a} * $self->{params}->{k0} * $self->{params}->{ms1}));
+            $lon = $self->{params}->{lon0};
             if ($rh <= $EPSLN) {
-                $Chi = $params->{X0};
+                $Chi = $self->{params}->{X0};
             } else {
-                $Chi = asin(cos($ce) * $params->{sinX0} + $y * sin($ce) * $params->{cosX0} / $rh);
-                $lon = adjust_lon($params->{lon0} + atan2($x * sin($ce), $rh * $params->{cosX0} * cos($ce) - $y * $params->{sinX0} * sin($ce)));
+                $Chi = asin(cos($ce) * $self->{params}->{sinX0} + $y * sin($ce) * $self->{params}->{cosX0} / $rh);
+                $lon = adjust_lon($self->{params}->{lon0} + atan2($x * sin($ce), $rh * $self->{params}->{cosX0} * cos($ce) - $y * $self->{params}->{sinX0} * sin($ce)));
             }
-            $lat = -1 * phi2z($params->{e}, tan(0.5 * (pip2 + $Chi)));
+            $lat = -1 * phi2z($self->{params}->{e}, tan(0.5 * (pip2 + $Chi)));
         }
     }
     # p.x = lon;
