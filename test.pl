@@ -2,28 +2,45 @@ use v5.28.0;
 use strict;
 use warnings;
 use Data::Dumper;
+use POSIX qw(round nearbyint); 
 use FindBin;
 use lib "$FindBin::Bin";
 use Stereo;
 use CoordConv;
 use Vector;
-use Matrix3D;
+# use Matrix;
 use Math::Trig;
 
 my ($lon, $lat, $elev) = (19.18, 47.35, 440);
+
+sub nearest_squared {
+    my ($n) = @_;
+    $n = nearbyint($n);
+    return $n if ((sqrt($n) % 1) eq 0);
+    return nearest_squared($n+1);
+}
+
+my $nearest_squared = &nearest_squared;
+
+# warn $nearest_squared(5);
+
 # my $cc = CoordConv->new($lon, $lat, $elev);
-my $vec = Vector->new(-123, 123, -232);
-my $vec1 = Vector->new( 91, 42, 21 );
+# my $vec = Vector->new(-123, 123, -232);
+# my $vec1 = Vector->new( 91, 42, 21 );
+# my $m = Matrix->new([[1,2,3],[4,3,2], [7,3,2]]);
+# my $m1 = Matrix->new();
 # # my $mt = Matrix3D->new([[1,2,3],[4,5,6],[7,8,9]]);
 # print Dumper {vector => $vec, mag => $vec->mag, unit => $vec->unit};
-print Dumper {
-    vec => $vec,
-    vec1 => $vec1,
-    add10 => $vec->add(10),
-    addvec => $vec->add(Vector->new(1,2,3)),
-    # `addvec => $vec->add($vec),
-    sub => $vec->sub($vec1)
-};
+# print Dumper {
+#     vec => $vec,
+#     vec1 => $vec1,
+#     add10 => $vec->add(10),
+#     addvec => $vec->add(Vector->new(1,2,3)),
+#     # `addvec => $vec->add($vec),
+#     sub => $vec->sub($vec1),
+#     matrix => $m,
+#     matrix1 => $m1
+# };
 # print Dumper ($vec->mag);
 # # print Dumper $mt * $mt;
 # # print Dumper $cc;
