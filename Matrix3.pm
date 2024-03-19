@@ -1,4 +1,4 @@
-package Matrix;
+package Matrix3;
 use strict;
 use warnings;
 use Data::Dumper;
@@ -11,6 +11,7 @@ our $VERSION = qw(1.0.0);
 our @EXPORT = qw(new);
 our @EXPORT_OK = qw(dim size);
 # 
+use constant MAXSIZE => 9;    # 3X3 matrix
 my $dim;
 my $size;
 # 
@@ -36,6 +37,13 @@ sub new {
     my $self = [];                                  # it's an ARRAY object
     bless($self, $class);                           # Bless the reference into that package
     my @args = @_;                                  # save arguments
+    my $alen = scalar @args;
+    if ($alen >= &MAXSIZE) {
+        $alen = &MAXSIZE;
+    } elsif ($alen eq 0) {
+        $alen = &MAXSIZE;
+    }
+    @args = splice(@_, 0, $alen);
     if (@args) {
         $size = $private_nearest_square->(@args);          # get the size of the matrix: default 2x2=4 square maxtrix
         $dim = sqrt($private_nearest_square->(@args));     # get the dimension of the square matrix: default 2
@@ -43,12 +51,10 @@ sub new {
         $dim = 2;
         $size = 4;   
     }
-    my $alen = scalar @args;
-    @args = splice(@args, 0, $alen);
     my $aref = \@$self;                             # make an array reference of the class instance
     @$aref = (0) x $size;
     my @a = [ @args[0..$alen-1] ];
-    for (my $i = 0; $i < $alen-1; $i += 1) {
+    for (my $i = 0; $i < $alen; $i += 1) {
         if (defined $args[$i]) {
             @$aref[$i] = $args[$i];
         }

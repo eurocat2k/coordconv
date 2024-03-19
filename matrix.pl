@@ -4,10 +4,10 @@ use POSIX qw(round ceil nearbyint);
 use Data::Dumper;
 use FindBin;
 use lib "$FindBin::Bin";
-use Matrix;
+use Matrix3;
 
-my $m = Matrix->new(12,undef,23,13,-24,undef,-17,2);
-my $m1 = Matrix->new;
+my $m = Matrix3->new(1,2,3,4,5,6,7,8,9,10,11,12);
+my $m1 = Matrix3->new;
 # print Dumper $m, {mdim => $m->dim}, {msize => $m->size}, $m1, {m1dim => $m1->dim}, {m1size => $m1->size};
 print Dumper $m;
 $m->print;
