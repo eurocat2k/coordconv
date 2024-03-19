@@ -6,31 +6,35 @@ use FindBin;
 use lib "$FindBin::Bin";
 use Matrix3;
 
+# constructor of 3x3 matrix
 my $m = Matrix3->new(1,2,3,4,5,6,7,8,9,10,11,12);
 my $m1 = Matrix3->new;
-# print Dumper $m, {mdim => $m->dim}, {msize => $m->size}, $m1, {m1dim => $m1->dim}, {m1size => $m1->size};
-print Dumper $m;
+my $m2 = Matrix3->new;
+# print
 $m->print;
-
-# print Dumper $m, $m->size, $m->dim;
-# # STEP 0
-# my $a = [];         # the self object
-# my $aref = \@$a;    # create an array reference
-# my @arr0 = (0) x 9; # initialize with zeroes
-# push @$aref, [ splice @arr0, 0, 3 ] while @arr0;    # push elements into the original object
-# # STEP 1
-# my @arr1 = (1,2,3,4,5,6,7);
-# my @arr2;
-# push @arr2, [ splice @arr1, 0, 3 ] while @arr1;     # make input elements conform to object structure
-# # STEP 2
-# my $rowId = 0;
-# for my $row (@arr2) {
-#     for my $col (0..2) {
-#         if (defined @$row[$col]) {
-#             @$aref[$rowId]->[$col] = @$row[$col];   # set original object's matching element with source element
-#         }
-#     }
-#     $rowId += 1;
-# }
-# # 
-# print Dumper $a;
+# set
+warn "set(4,8,99,undef,3)\n";
+$m->set(undef,114,-18,-99,undef,36,1,undef,13,65)->print;
+# identity
+$m1->identity->print;
+# copy from another matrix
+$m1->copy($m)->print;
+# mul
+$m1->set(.5, .3, .1, .5, .25, .75, .25, .05, .01)->print;
+$m2->set(2, 3, 4, 5, 6, 7, 8, 9, 10);
+# static
+Matrix3->mul($m1, $m2)->print;
+$m->mul($m1, $m2)->print;
+# destructive
+$m->mul($m2)->mul($m1)->print;
+# multiply with scalar
+$m->mulscale(.5)->print->mulscale(-1)->print;
+# determinant
+print "det m = ".$m->det."\n";
+# inverse
+$m->set(1,5,-9,10,1,12,-8,3,1)->invert->print;
+$m->invert->print;
+# transpose
+$m->transpose->print;
+# setUvTransform
+$m1->setUvTransform(13, 11, -9, 23, 12, 0, 0)->print;
