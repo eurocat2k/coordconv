@@ -11,16 +11,20 @@ use Vector;
 # use Matrix;
 use Math::Trig;
 
-my ($lon, $lat, $elev) = (19.18, 47.35, 440);
+# my ($lon, $lat, $elev) = (19.18, 47.35, 440);
 
-sub nearest_squared {
-    my ($n) = @_;
-    $n = nearbyint($n);
-    return $n if ((sqrt($n) % 1) eq 0);
-    return nearest_squared($n+1);
-}
+# sub nearest_squared {
+#     my ($n) = @_;
+#     $n = nearbyint($n);
+#     return $n if ((sqrt($n) % 1) eq 0);
+#     return nearest_squared($n+1);
+# }
 
-my $nearest_squared = &nearest_squared;
+# my $nearest_squared = &nearest_squared;
+
+my $label = "LABEL";
+
+print ref(\$label);
 
 # warn $nearest_squared(5);
 

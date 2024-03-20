@@ -23,8 +23,8 @@ $m1->copy($m)->print;
 $m1->set(.5, .3, .1, .5, .25, .75, .25, .05, .01)->print;
 $m2->set(2, 3, 4, 5, 6, 7, 8, 9, 10);
 # static
-Matrix3->mul($m1, $m2)->print;
-$m->mul($m1, $m2)->print;
+Matrix3->multipleMatrices($m1, $m2)->print;
+$m->multipleMatrices($m1, $m2)->print;
 # destructive
 $m->mul($m2)->mul($m1)->print;
 # multiply with scalar
