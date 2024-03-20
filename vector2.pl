@@ -24,6 +24,7 @@ print "\$v0 dim = ".$v0->dim."\n";
 print "\$v0 size = ".$v0->size."\n";
 $v0->set(1,1)->print('AFTER SET');
 $v0->print;
+Vector2->set($v0, 2, 5)->print('After called static method');
 # $v0->print;
 # $v0->print('test1');
 # $v0->print($v0, 'test2');

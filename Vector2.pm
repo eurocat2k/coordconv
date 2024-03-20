@@ -92,20 +92,24 @@ sub set {
     my @idxs = ( 0 .. &MAXSIZE -1);
     unless (ref $self) {
         # Static
-        # unless (ref($v0) ne __PACKAGE__ ) {
-        #     @args = splice(@args, 0, &MAXSIZE);
-        #     foreach (@idxs) {
-        #         @$self[ $idxs[$_] ] = $args[$_] unless not defined $args[$_];
-        #     }
-        #     return $self;    
-        # }
-        # die "Error: ".__PACKAGE__."->dim expects ".__PACKAGE__." type argument";
+        my $v0 = $args[0];
+        unless (ref($v0) ne __PACKAGE__ ) {
+            # my @args = @$v1;
+            @args = splice(@args, 1, &MAXSIZE+1);
+            foreach (@idxs) {
+                $v0->[ $idxs[$_] ] = $args[$_] unless not defined $args[$_];
+            }
+            return $v0;    
+        }
+        die "Error: ".__PACKAGE__."->set expects ".__PACKAGE__." type argument and ARRAY for values";
     } else {
         # Instance
+        # my @args = $$v0;    # dereferencing ARRAY ref!!!!
         @args = splice(@args, 0, &MAXSIZE);
         foreach (@idxs) {
             @$self[ $idxs[$_] ] = $args[$_] unless not defined $args[$_];
         }
+        # print Dumper $v0;
         return $self;
     }
 }
@@ -204,6 +208,8 @@ sub print {
 }
 # 
 sub copy {
+
+
     my $self = shift;
     my Vector2 ($v1, $v2) = @_;
     my @idxs = ( 0 .. &MAXSIZE -1);

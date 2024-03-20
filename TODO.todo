@@ -4,7 +4,7 @@ Implement VECTOR 2D:
     ☐ Vector2.pm
     Details:
         ✔ constructor @done(24-03-20 14:01)
-        ✔ set @done(24-03-20 14:01)
+        ✔ set @done(24-03-20 14:17)
         ✔ print @done(24-03-20 14:02)
         ☐ clone
         ☐ copy
