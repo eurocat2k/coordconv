@@ -1,4 +1,19 @@
 package Vector2D;
+
+=head1 NAME
+
+Vector2D
+
+=head1 SYNOPSYS
+
+use Vector2D;
+
+my $vector = Vector2D->new();
+
+my $vector = Vector2D->new(1, 1);
+
+=cut
+
 use utf8;
 use strict;
 use warnings;
@@ -8,10 +23,11 @@ use Math::Trig qw(deg2rad rad2deg);
 use Carp;
 use Scalar::Util qw(looks_like_number);
 use constant MAXSIZE => 2;    # 1X2 vector X,Y
+use constant DEBUG => 0; # 1 uses DEBUG constants
 use FindBin;
 use lib "$FindBin::Bin";
 BEGIN {
-    require Exporter;    
+    require Exporter;
 }
 our @ISA = qw(Exporter);
 our $VERSION = qw(1.0.0);
@@ -19,6 +35,16 @@ our @EXPORT = qw(new);
 our @EXPORT_OK = qw(dim size debug);
 my $dim;
 my $size;
+# operator overloads
+use overload
+    '+' => sub {
+        my ( $v0, $v1, $opt ) = @_;
+        return $v0->add($v1);
+    },
+    '-' => sub {
+        my ( $v0, $v1, $opt ) = @_;
+        return $v0->subtract($v1);
+    };
 #
 my $private_nearest_square = sub {
     my $n = @_;
@@ -37,25 +63,35 @@ my $private_nearest_square_root = sub {
     return sqrt($sq);
 };
 #
+=head2 Constructor
+
+=over
+
+=item new(X: 0, y: 0)
+
+The constructor expects zero, one or max two scalar values.
+
+=back
+
+=cut
+
 sub new {
-    my $class = shift;                              # Store the package name
-    my $self = [];                                  # it's an ARRAY object
-    bless($self, $class);                           # Bless the reference into that package
-    my @args = @_;                                  # save arguments
-    @args = splice(@_, 0, MAXSIZE);
-    $dim = 1;
-    $size = MAXSIZE;
-    my $aref = \@$self;                             # make an array reference of the class instance
-    @$aref = (0) x $size;
-    my @a = [ @args[0..MAXSIZE-1] ];
-    for (my $i = 0; $i < MAXSIZE; $i += 1) {
-        if (defined $args[$i]) {
-            @$aref[$i] = $args[$i];
-        } else {
-            @$aref[$i] = 0;
+    my $self   = $_[0];
+    my @params = @_;
+
+    # print Dumper {params => @params};
+    # @params = splice(@params, 0, MAXSIZE);
+    my $elems = [];
+    for ( 0 .. MAXSIZE- 1 ) {
+        if ( defined $params[ $_ + 1 ] ) {
+            @$elems[$_] = $params[ $_ + 1 ];
+        }
+        else {
+            @$elems[$_] = 0;
         }
     }
-    return $self;
+    return bless { elems => $elems, dim => 1, size => MAXSIZE },
+      ref($self) || $self;
 }
 #
 sub dim {
@@ -63,13 +99,12 @@ sub dim {
     unless (ref $self) {
         # Static
         unless (ref($v0) ne __PACKAGE__ ) {
-            return round(sqrt(scalar @$v0));
+            return $v0->{dim};
         }
         die "Error: ".__PACKAGE__."->dim expects ".__PACKAGE__." type argument";
     } else {
         # Instance
-        my $aref = \@$self;
-        return round(sqrt(scalar @$aref));
+        return $self->{dim};
     }
 }
 #
@@ -78,269 +113,307 @@ sub size {
     unless (ref $self) {
         # Static
         unless (ref($v0) ne __PACKAGE__ ) {
-            return &MAXSIZE;
+            return $v0->{size};
         }
         die "Error: ".__PACKAGE__."->dim expects ".__PACKAGE__." type argument";
     } else {
         # Instance
-        return MAXSIZE;
-    }
-}
-# 
-sub add {
-    my ($self, $v0, $v1) = @_;
-    my $argc = scalar @_;
-    unless (ref $self) {
-        # static
-        die "Error: expected two Vector2D arguments" unless ($argc eq 3 and ref($v0) eq __PACKAGE__ and ref($v1) eq __PACKAGE__);
-        my $vr = Vector2D->new;
-        for (0 .. MAXSIZE - 1) {
-            $vr->[$_] = $v0->[$_] + $v1->[$_];
-        }
-        return $vr;
-    } else {
-        # instance
-        die "Error: expected one Vector2D argument" unless ($argc eq 2 and ref($v0) eq __PACKAGE__);
-        for (0 .. MAXSIZE - 1) {
-            $self->[$_] += $v0->[$_];
-        }
-        return $self;
-    }    
-}
-# 
-sub zero {
-    my ($self, @args) = @_;
-    my $argc = scalar @args;
-    my ($vr);
-    unless (ref $self) {
-        # static
-        if ($argc eq 1) {
-            $vr = shift @args;
-            if (defined $vr) {
-                for (0 .. MAXSIZE - 1) {
-                    $vr->[$_] = 0;
-                }
-            }
-        }
-    } else {
-        # instance
-        $vr = $self;
-        for (0 .. MAXSIZE - 1) {
-            $vr->[$_] = 0;
-        }
-    }
-    return $vr;
-}
-# 
-sub copy {
-    my ($self, @args) = @_;
-    my $argc = scalar @args;
-    my ($vs, $vr);
-    unless (ref $self) {
-        # static
-        if ($argc eq 2) {
-            $vs = shift @args;
-            die "Error: first argument is not defined or not Vector2D type" unless (defined $vs and ref($vs) eq __PACKAGE__);
-            $vr = shift @args;
-            if (not defined $vr) {
-                $vr = Vector2D->new;
-            }
-            $vr->set(@$vs);
-        }
-    } else {
-        # instance
-        $vs = shift @args;
-        $vr = Vector2D->new;
-        if (not defined $vs) {
-            $vs = $self;
-        }
-        $vr->set($vs);
-    }
-    return $vr;
-}
-# 
-sub clone {
-    my ($self, @args) = @_;
-    my $argc = scalar @args;
-    my ($vr, $vs) = Vector2D->new;
-    unless (ref $self) {
-        # static
-        $vs = shift @args;
-        # for (0 .. MAXSIZE - 1) {
-        #     $vr->[$_] = $vs->[$_] unless not defined $vs->[$_];
-        # }
-    } else {
-        # instance
-        $vs = $self;
-        # for (0 .. MAXSIZE - 1) {
-        #     $vr->[$_] = $self->[$_] unless not defined $self->[$_];
-        # }
-    }
-    $vr->set(@$vs);
-    return $vr;
-}
-# 
-sub values {
-    my ($self, @args) = @_;
-    my $argc = scalar @args;
-    unless (ref $self) {
-        # Static
-        my $vr = shift @args;
-        return @$vr;
-    } else {
-        # Instance
-        return @$self;
-    }
-}
-# 
-sub set {
-    my ($self, @args) = @_;
-    my $argc = scalar @args;
-    unless (ref $self) {
-        # Static
-        my $vr = shift @args;
-        for (0..MAXSIZE-1) {
-            $vr->[$_] = $args[$_] unless (not defined $_);
-        }
-        return $vr;
-    } else {
-        # Instance
-        if (ref $args[0] eq __PACKAGE__) {
-            my $vs = shift @args;
-            for (0..MAXSIZE-1) {
-                $self->[$_] = $vs->[$_] unless (not defined $_);
-                # debug(__LINE__, __FILE__, "set $_ with ".$vs->[$_]);
-            }
-        } else {
-            for (0..MAXSIZE-1) {
-                $self->[$_] = $args[$_] unless (not defined $_);
-            }
-        }
-        return $self;
+        return $self->{size};
     }
 }
 #
-sub print {
-    my ($self, @args) = @_;
-    my $argc = scalar @args;
-    # static first
-    unless (ref($self)) {
-        if ($argc eq 1 and ref($args[0]) eq __PACKAGE__) {
-            # print without custom label
-            my $v = shift @args;
-            print "[\n";
-            for (0..MAXSIZE-1) {
-                if ($_ < MAXSIZE-1) {
-                    printf("    %.12e,\n", $v->[$_]);
-                } else {
-                    printf("    %.12e\n", $v->[$_]);
-                }
-            }
-            print "]\n";
-            return $v;
-        } elsif ($argc eq 2 and ref($args[0]) eq __PACKAGE__) {
-            # print without custom label
-            my $v = shift @args;
-            print "$args[0]: [\n";
-            for (0..MAXSIZE-1) {
-                if ($_ < MAXSIZE-1) {
-                    printf("    %.12e,\n", $v->[$_]);
-                } else {
-                    printf("    %.12e\n", $v->[$_]);
-                }
-            }
-            print "]\n";
-            return $v;
+
+=head2 Methods
+
+=over
+
+=item - set( $v0, $v1, $opt, $opt1 )
+
+This method sets the vector elements. Depending on the type of caller - Class or instance -
+the method will parse first three, or all arguments.
+
+If caller is a Class, the $v1 refers to the instance which will be
+altered with the remaining arguments - if they defined.
+
+If caller is an instance, $1 and $opt will be used to set vector elements.
+
+=back
+
+=cut
+
+sub set {
+    my ( $v0, $v1, $opt, $opt1 ) = @_;
+    croak "Not enough arguments for ", ( caller(0) )[3] if @_ < 2;
+    croak "Too many arguments for ",   ( caller(0) )[3] if @_ > 4;
+    unless ( ref($v0) ) {
+
+        # $v1, $opt, $opt1 used
+        croak "Error: invalid type of argument detected: expected "
+          . __PACKAGE__
+          . " and optionally other two scalars - ", ( caller(0) )[3]
+          if ( ref($v1) ne __PACKAGE__ );
+        my @args = ( $opt, $opt1 );
+        for ( 0 .. MAXSIZE - 1 ) {
+            $v1->{elems}[$_] = $args[$_] if defined $args[$_];
         }
-    } else {
-        if ($argc eq 1) {
-            # there is a label
-            print "$args[0]: [\n";
+        return $v1;
+    }
+    else {
+        # $v0, $v1, $opt used
+        my @args = ( $v1, $opt );
+        for ( 0 .. MAXSIZE - 1 ) {
+            $v0->{elems}[$_] = $args[$_] if defined $args[$_];
+        }
+        return $v0;
+    }
+}
+#
+
+=over
+
+=item - add( $v0, $v1, $opt )
+
+See C<subtract> above.
+
+=back
+
+=cut
+
+sub add {
+    my ( $v0, $v1, $opt ) = @_;
+
+    # print "argcount:" . scalar @_ . "\n";
+    croak "Not enough arguments for ", ( caller(0) )[3] if @_ < 2;
+    croak "Too many arguments for ",   ( caller(0) )[3] if @_ > 3;
+    unless ( ref($v0) ) {
+        if ( ref($v1) eq ref($opt) and ref($v1) eq __PACKAGE__ ) {
+            my $vr = $v1->new;
+            for ( 0 .. MAXSIZE - 1 ) {
+                $vr->{elems}[$_] = $v1->{elems}[$_] + $opt->{elems}[$_];
+            }
+            return $vr;
+        }
+    }
+    else {
+        # # returns new vector
+        if ( ref($v0) eq ref($v1) and ref($v0) eq __PACKAGE__ ) {
+            my $vr = $v0->new;
+            for ( 0 .. MAXSIZE - 1 ) {
+                $vr->{elems}[$_] = $v0->{elems}[$_] + $v1->{elems}[$_];
+            }
+            return $vr;
+        }
+    }
+}
+#
+
+=over
+
+=item - subtract($v0, $v1, $opt)
+
+Expects maximum 3 arguments. If all arguments set - the argument count equals 3, the first
+two will contain the references to the Vector2D instances.
+
+If only two arguments defined - the static method called - the Vector2D class calls
+the subtract method with two references: first vector will be subtracted by second vector.
+
+The result going to be stored into a new vector in both cases;
+
+=back
+
+=cut
+sub subtract {
+    my ( $v0, $v1, $opt ) = @_;
+    # print "argcount:" . scalar @_ . "\n";
+    croak "Not enough arguments for ", ( caller(0) )[3] if @_ < 2;
+    croak "Too many arguments for ",   ( caller(0) )[3] if @_ > 3;
+    unless ( ref($v0) ) {
+        if ( ref($v1) eq ref($opt) and ref($v1) eq __PACKAGE__ ) {
+            my $vr = $v1->new;
+            for ( 0 .. MAXSIZE - 1 ) {
+                $vr->{elems}[$_] = $v1->{elems}[$_] - $opt->{elems}[$_];
+            }
+            return $vr;
+        }
+    }
+    else {
+        # # returns new vector
+        if ( ref($v0) eq ref($v1) and ref($v0) eq __PACKAGE__ ) {
+            my $vr = $v0->new;
+            for ( 0 .. MAXSIZE - 1 ) {
+                $vr->{elems}[$_] = $v0->{elems}[$_] - $v1->{elems}[$_];
+            }
+            return $vr;
+        }
+    }
+}
+#
+
+=over
+
+=item - print($v0, $v1, $opt)
+
+If the caller is not an instance but Vector2D class, the last two
+arguments processed - $opt refers to the label text argument, this is
+optional. The $v1 argument refers to an instance of Vector2D class.
+
+If the caller is an instance, only the first two arguments will be used.
+
+The first one is the instance itself, the second - optional - argument
+is the label text.
+
+Returns the printed instance in both cases.
+
+=back
+
+=cut
+
+sub print {
+    my ($v0, $v1, $opt) = @_;
+    my $ret;
+    unless (ref($v0)) {
+        # the static method
+        croak "Error: argument type is not ".__PACKAGE__."\n", (caller(0))[3] if (ref($v1) ne __PACKAGE__);
+        if (defined $opt) {
+            print qq("$opt").": [\n";
         } else {
             print "[\n";
         }
-        for (0..MAXSIZE-1) {
-            if ($_ < MAXSIZE-1) {
-                printf("    %.12e,\n", $self->[$_]);
+        for (0 .. MAXSIZE - 1) {
+            # printf "    %.12e,\n", $v1->{elems}[$_] unless ($_ < MAXSIZE - 1);
+            if ($_ < MAXSIZE - 1){
+                printf "    %.12e, \n", $v1->{elems}[$_];
+                carp "DEBUG: \$v1->{elements}[$_] = "
+                  . $v1->{elems}[$_]
+                  . "; # called ", ( caller(0) )[3]
+                  unless !DEBUG;
             } else {
-                printf("    %.12e\n", $self->[$_]);
+                printf "    %.12e \n", $v1->{elems}[$_];
+                carp "DEBUG: \$v1->{elements}[$_] = "
+                  . $v1->{elems}[$_]
+                  . "; # called ", ( caller(0) )[3]
+                  unless !DEBUG;
             }
         }
-        print "]\n";
-        return $self;
+        $ret = $v1;
+    } else {
+        # the instance method
+        if (defined $v1 and ref(\$v1) eq 'SCALAR') {
+            print qq("$v1") . ": [\n"
+        } else {
+            print "[\n";
+        }
+        for (0 .. MAXSIZE - 1) {
+            if ( $_ < MAXSIZE - 1 ) {
+                printf "    %.12e, \n", $v0->{elems}[$_];
+                carp "DEBUG: \$v1->{elements}[$_] = "
+                  . $v0->{elems}[$_]
+                  . "; # called ", ( caller(0) )[3]
+                  unless !DEBUG;
+            }
+            else {
+                printf "    %.12e \n", $v0->{elems}[$_];
+                carp "DEBUG: \$v1->{elements}[$_] = "
+                  . $v0->{elems}[$_]
+                  . "; # called ", ( caller(0) )[3]
+                  unless !DEBUG;
+            }
+        }
+        $ret = $v0;
     }
+    print "]\n";
+    return $ret;
 }
-# 
+#
+=over
+
+=item - zero($v0, $v1)
+
+This method initializes the vector with 0s.
+
+If caller is a Class, then the second argument will be zeroed, otherwise the first one
+which is the instance itself.
+
+=back
+
+=cut
+sub zero {
+    my $ret = $_[0];
+    unless (ref $_[0]) {
+        # static method: $_[1] shall be zeroed if it's an instance of Vector2D
+        croak "Error: invalid type detected - called ", ( caller(0) )[3] if (ref ($_[1]) ne __PACKAGE__);
+        for (0 .. MAXSIZE - 1) {
+            $_[1]->{elems}[$_] = 0;
+        }
+        # print Dumper {retstatic => $_[1]};
+        $ret = $_[1];
+        # return $_[1];
+    } else {
+        for (0 .. MAXSIZE - 1) {
+            $_[0]->{elems}[$_] = 0;
+        }
+        # print Dumper { retinstance => $_[0] };
+        $ret = $_[0];
+    }
+    return $ret;
+}
+#
+
+=over
+
+=item - clone(@args)
+
+This method creates an exact copy of the argument ( I<which must be an instance of Vector2D class> ) - in that case, when
+the caller is the Class -, or itself.
+
+Returns a new instance vector.
+
+=back
+
+=cut
+sub clone {
+    my $ret;
+    unless (ref $_[0]) {
+        croak "Error: invalid type detected - called ", ( caller(0) )[3]
+          if ( ref( $_[1] ) ne __PACKAGE__ );
+        # The trick - dereference instance elements into a list
+        $ret = Vector2D->set( $_[1] , @{ $_[1]->{elems} } );
+    } else {
+        $ret = Vector2D->set( $_[0] , @{ $_[0]->{elems} } );
+    }
+    return $ret;
+}
+#
+
+
+=over
+
+=item - copy(@args)
+
+This method is an alias of clone. See details L<clone> method above.
+
+=back
+
+=cut
+sub copy {
+    my $ret;
+    unless (ref $_[0]) {
+        croak "Error: invalid type detected - called ", ( caller(0) )[3]
+          if ( ref( $_[1] ) ne __PACKAGE__ );
+        # The trick - dereference instance elements into a list
+        $ret = Vector2D->set( $_[1] , @{ $_[1]->{elems} } );
+    } else {
+        $ret = Vector2D->set( $_[0] , @{ $_[0]->{elems} } );
+    }
+    return $ret;
+}
+#
 sub debug {
     my ($line, $file, $msg) = @_;
     printf "DEBUG::\"%s\" @ line %d in \"%s\".\n", length $msg ? $msg : "info", $line, $file;
 };
-1;
 
-=head1 B<NAME>
-
-Vector2D
-
-=head1 B<SYNOPSYS>
-
-use Vector2D;
-
-my $vector = Vector2D->new;
-
-my $vector = Vector2D->new(1,2);
-
-=head1 B<DESCRIPTION>
-
-Vector2D is a 2D vector manipulation package. The following methods defined:
-
-=head2 B<constructor>
-
-=over
-
-=item new([args,...])
-
-Without any arguments the vector will be initialized with 0s. However any arguments - in range of [0..1] - defined,
-it will be placed into the vector instance at the same index. The remaining will not modify the original value.
-
-=back
-
-=head2 B<Static calls>
-
-These calls utilize Vector2D instead it's instance. In most cases the manipulations result
-a brand new Vector2D instance. Whence does not, it will be said so.
-
-=over
-
-=item - print(vector[,label])
-
-prints out the vector elements. If C<label> defined, then adds the label text up front of the printout.
-
-=item - set(vector)
-
-sets the elements from arguments - as a Vector2D instance, or list of elements. 
-
-Returns with the modified vector.
-
-=item - size(vector)
-
-returns the element count of the vector instance.
-
-=item - dim(vector)
-
-returns the number of rows or dimensions - I<X,Y> - of the vector instance.
-
-=back
-
-=head2 B<Prototype calls>
-
-These calls utilize Vector2D instance. These calls used to call as destructive functions, because most of
-the time the manipulations going to happen with the instance itself.
-
-=over
-
-=back
-
-=head2 B<Auxiliary methods>
+=head2 B<Misc methods>
 
 These methods extends the capabilities of the Vector2D package.
 
@@ -364,4 +437,4 @@ L<Vector3D(3)>, L<Matrix2D(3)>, L<Matrix3D(3)>, L<Matrix4D(3)>
 
 G.Zelenak
 
-
+1;

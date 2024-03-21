@@ -6,10 +6,16 @@ use FindBin;
 use lib "$FindBin::Bin";
 use Vector2D;
 # new and set and print
-my ($v0, $v1, $v2) = Vector2D->new;
-$v0->set(3,2)->print('v0');
-$v1 = $v0->clone->print('v1')->set(8,4);
-Vector2D->add($v0, $v1)->print('static v0 + V1');
-$v0->add($v1)->print('v0 + v1');
-
-
+my ($v0, $v1, $v2) = (Vector2D->new(1,2), Vector2D->new(3, 4));
+$v2 = ($v0 + $v1)->print('v0 + v1');
+$v2 = ($v2 - $v1)->print('v2 - v1');
+Vector2D->print($v1, 'v1');
+$v2->print('v0');
+$v1->set(10,20)->print('v1 after set');
+Vector2D->set($v1, -1, -2)->print('v1 after static set');
+Vector2D->zero($v1)->print('static zeroed v1');
+$v1->set(99,99)->print('v1 reste')->zero->print('instance zeroed v1');
+Vector2D->clone($v0)->print('static clone of v0');
+$v1->set(4, 4)->clone->print('cloned v1 instance');
+# print Dumper @{$v0->{elems}};
+# print Dumper $v2;

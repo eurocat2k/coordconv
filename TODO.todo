@@ -1,19 +1,22 @@
 ## VECTOR 2D/3D MATRIX 2D/3D/4D LIBRARY TODOs
 
 Implement VECTOR 2D:
-    ☐ Vector2.pm
+    ☐ Vector2.pm @started(24-03-21 09:00)
     Details:
-        ✔ constructor @done(24-03-21 07:59)
-        ✔ set @done(24-03-21 10:56)
-        ✔ print @done(24-03-21 07:59)
-        ✔ clone @done(24-03-21 10:56)
-        ✔ zero @done(24-03-21 12:28)
-        ✔ copy @done(24-03-21 12:49)
+        ✔ constructor @done(24-03-21 18:32)
+        ✔ set @done(24-03-21 20:26)
+        ✔ print @done(24-03-21 19:37)
+        ✔ clone @done(24-03-21 21:22)
+        ✔ zero @done(24-03-21 20:54)
+        ✔ copy @done(24-03-21 21:30)
         ✔ add @done(24-03-21 13:10)
+        ✔ subtract @done(24-03-21 18:35)
+        add overloaded:
+            ✔ + add two vectors @done(24-03-21 18:33)
+            ✔ - subtract two vectors @done(24-03-21 18:35)
         ☐ addScalar
         ☐ addVectors
         ☐ addScaledVector
-        ☐ sub
         ☐ subScalar
         ☐ subVectors
         ☐ multiply
