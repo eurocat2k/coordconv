@@ -3,11 +3,12 @@
 Implement VECTOR 2D:
     ☐ Vector2.pm
     Details:
-        ✔ constructor @done(24-03-20 14:01)
-        ✔ set @done(24-03-20 14:17)
-        ✔ print @done(24-03-20 14:02)
-        ☐ clone
-        ☐ copy
+        ✔ constructor @done(24-03-21 07:59)
+        ✔ set @done(24-03-21 10:56)
+        ✔ print @done(24-03-21 07:59)
+        ✔ clone @done(24-03-21 10:56)
+        ✔ zero @done(24-03-21 12:28)
+        ✔ copy @done(24-03-21 12:49)
         ☐ add
         ☐ addScalar
         ☐ addVectors

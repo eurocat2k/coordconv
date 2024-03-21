@@ -22,9 +22,88 @@ use Math::Trig;
 
 # my $nearest_squared = &nearest_squared;
 
-my $label = "LABEL";
+package A;
+use Data::Dumper;
+sub new {
+    my $class = shift;                              # Store the package name
+    my $self = [];                                  # it's an ARRAY object
+    bless($self, $class);                           # Bless the reference into that package
+    # my @args = @_;                                  # save arguments
+    # @args = splice(@_, 0, &MAXSIZE);
+    # $dim = 1;
+    # $size = &MAXSIZE;
+    # my $aref = \@$self;                             # make an array reference of the class instance
+    # @$aref = (0) x $size;
+    # my @a = [ @args[0..&MAXSIZE-1] ];
+    # for (my $i = 0; $i < &MAXSIZE; $i += 1) {
+    #     if (defined $args[$i]) {
+    #         @$aref[$i] = $args[$i];
+    #     } else {
+    #         @$aref[$i] = 0;
+    #     }
+    # }
+    return $self;
 
-print ref(\$label);
+    sub demo_sub {
+        my ($self, @args) = @_;
+        # Static part
+        unless (ref($self) eq __PACKAGE__) {
+            print "Class call::";
+            # handle arguments
+            if (@args) {
+                # if sub expects only one argument and it shall be an instance of the class
+                # we need to check if argument'ref is not equal with __PACKAGE__
+                my $idx = 0;
+                for (@args) {
+                    unless (ref($_) ne __PACKAGE__) {
+                        # so, it equals...
+                        print "\n   $idx. argument in Instance clall is an instance of : [".ref($_)."]";
+                    } else {
+                        print "\n   $idx. argument in Instance clall is an instance of : [".ref(\$_)."] = ".$_;
+                    }
+                    $idx += 1;
+                }
+            }
+            print "\n\n";
+            return;
+        }
+        # Instance call
+        unless (ref($self) ne __PACKAGE__) {
+            print "Instance call::";
+            # handle arguments
+            if (scalar @args) {
+                # if sub expects only one argument and it shall be an instance of the class
+                # we need to check if argument'ref is not equal with __PACKAGE__
+                my $idx = 0;
+                for (@args) {
+                    unless (ref($_) ne __PACKAGE__) {
+                        # so, it equals...
+                        print "\n   $idx. argument in Instance clall is an instance of : [".ref($_)."]";
+                    } else {
+                        print "\n   $idx. argument in Instance clall is an instance of : [".ref(\$_)."] = ".$_;
+                    }
+                    $idx += 1;
+                }
+            }
+            print "\n\n";
+            return;
+        }
+    }
+}
+
+package main;
+
+my $a = A->new();
+
+# instance call
+$a->demo_sub;
+$a->demo_sub($a);
+$a->demo_sub($a, 'text');
+# 
+A->demo_sub;
+A->demo_sub($a);
+A->demo_sub($a, 'text');
+
 
 # warn $nearest_squared(5);
 

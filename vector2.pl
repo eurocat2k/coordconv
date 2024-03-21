@@ -4,29 +4,16 @@ use POSIX qw(round ceil nearbyint);
 use Data::Dumper;
 use FindBin;
 use lib "$FindBin::Bin";
-use Vector2;
-# new and set
-my $v0 = Vector2->new->set(3, 3);
-# my $v1 = Vector2->new;
-# my $v2 = Vector2->new;
-# clone and copy
-# $v1 = Vector2->clone($v0->print('v0'))->print('v0 cloned to v1');
-# $v1->print($v1, 'v1 before set new values')->set(-8,4)->print($v1, 'after set (-8, 4)');
-# Vector2->print('test', ' meg meg valami');
-# Vector2->print;                 # arg count eq 1
-Vector2->print('test 1');           # arg count eq 2 no print
-Vector2->print($v0);                # arg count eq 2 print vector and no label
-Vector2->print($v0, 'test 2');      # arg count eq 3 print $v0 and the label 
-Vector2->print($v0, 'test0 with instance and text');
-print "Vector2 dim = ".Vector2->dim($v0)."\n";
-print "Vector2 size = ".Vector2->size($v0)."\n";
-print "\$v0 dim = ".$v0->dim."\n";
-print "\$v0 size = ".$v0->size."\n";
-$v0->set(1,1)->print('AFTER SET');
-$v0->print;
-Vector2->set($v0, 2, 5)->print('After called static method');
-# $v0->print;
-# $v0->print('test1');
-# $v0->print($v0, 'test2');
-# add and subtract
-# 
+use Vector2D;
+# new and set and print
+my ($v0, $v1, $v2) = Vector2D->new;
+$v0->set(3,2)->print('v0');
+$v1 = $v0->clone->print('v1')->set(8,4);
+# $v2 = Vector2D->copy($v2, $v1)->print('after static copy v2');
+# $v1 = $v2->set(-9, 23)->copy($v2)->print('v1 after copy');
+# $v1->zero->print('zeroed v1')->set($v0)->print('v0 set v1')->set(7, 8)->print('v1 after set 7, 8');
+# $v2 = Vector2D->copy($v2, $v0)->print;
+# $v2 = Vector2D->copy($v0, $v2)->print;
+$v2 = $v1->copy($v1)->print('v0 copied into v2');
+
+
