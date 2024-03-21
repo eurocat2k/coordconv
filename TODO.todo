@@ -9,7 +9,7 @@ Implement VECTOR 2D:
         ✔ clone @done(24-03-21 10:56)
         ✔ zero @done(24-03-21 12:28)
         ✔ copy @done(24-03-21 12:49)
-        ☐ add
+        ✔ add @done(24-03-21 13:10)
         ☐ addScalar
         ☐ addVectors
         ☐ addScaledVector

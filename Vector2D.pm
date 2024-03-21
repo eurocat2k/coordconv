@@ -87,6 +87,27 @@ sub size {
     }
 }
 # 
+sub add {
+    my ($self, $v0, $v1) = @_;
+    my $argc = scalar @_;
+    unless (ref $self) {
+        # static
+        die "Error: expected two Vector2D arguments" unless ($argc eq 3 and ref($v0) eq __PACKAGE__ and ref($v1) eq __PACKAGE__);
+        my $vr = Vector2D->new;
+        for (0 .. MAXSIZE - 1) {
+            $vr->[$_] = $v0->[$_] + $v1->[$_];
+        }
+        return $vr;
+    } else {
+        # instance
+        die "Error: expected one Vector2D argument" unless ($argc eq 2 and ref($v0) eq __PACKAGE__);
+        for (0 .. MAXSIZE - 1) {
+            $self->[$_] += $v0->[$_];
+        }
+        return $self;
+    }    
+}
+# 
 sub zero {
     my ($self, @args) = @_;
     my $argc = scalar @args;
