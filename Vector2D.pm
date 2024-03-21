@@ -460,6 +460,32 @@ sub mul {
     # return this[0] * v[0] + this[1] * v[1];
 }
 #
+=over
+
+=item - div(@args)
+
+This method multiplies two vectors - common elements miltiplied - quite the same as dot product, but the result is not summed.
+
+=back
+
+=cut
+sub div {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", (caller(0))[3] unless (ref $_[1] eq __PACKAGE__);
+        croak "Error: invalid argument detected at pos 2 ", (caller(0))[3] unless (ref $_[2] eq __PACKAGE__);
+        $_[1]->{elems}[0] *= $_[2]->{elems}[0];
+        $_[1]->{elems}[1] *= $_[2]->{elems}[1];
+        return $_[1];
+    } else {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        $_[0]->{elems}[0] *= $_[1]->{elems}[0];
+        $_[0]->{elems}[1] *= $_[1]->{elems}[1];
+        return $_[0];
+    }
+    # return this[0] * v[0] + this[1] * v[1];
+}
+#
 sub debug {
     my ($line, $file, $msg) = @_;
     printf "DEBUG::\"%s\" @ line %d in \"%s\".\n", length $msg ? $msg : "info", $line, $file;
