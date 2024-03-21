@@ -11,18 +11,27 @@ Implement VECTOR 2D:
         ✔ copy @done(24-03-21 21:30)
         ✔ add @done(24-03-21 13:10)
         ✔ subtract @done(24-03-21 18:35)
-        add overloaded:
-            ✔ + add two vectors @done(24-03-21 18:33)
-            ✔ - subtract two vectors @done(24-03-21 18:35)
-        ☐ addScalar
-        ☐ addVectors
-        ☐ addScaledVector
-        ☐ subScalar
+            add overloaded '+-':
+            ✔ + add two vectors with overloaded '+' operator @done(24-03-21 18:33)
+            ✔ - subtract two vectors with overloaded '-' operator @done(24-03-21 18:35)
+        ☐ sadd add a scalar value to the vector
+        ☐ ssub subtract a scalar from vector
+            overloaded '+-':
+            ☐ + scalar add to vector with overloaded '+' operator
+            ☐ - subtract scalar from vector with overloaded '-' operator
         ☐ subVectors
-        ☐ multiply
-        ☐ multiplyScalar
-        ☐ divide
-        ☐ divideScalar
+        ✔ mul multiple two vectors - quite the same as dot product except no sum at the end @done(24-03-21 22:28)
+            overload '*':
+            ✔ overload '*' operator @done(24-03-21 22:31)
+        ☐ smul multiple vector with scalar
+            overload '*':
+            ☐ overload '*' operator for smul
+        ☐ div divide two vectors - see more at 'mul' method
+            overloaded '/':
+            ☐ overload '/' operator for div
+        ☐ sdiv
+            overloaded '/':
+            ☐ overload '/' operator for sdiv
         ☐ applyMatrix3
         ☐ min
         ☐ max
@@ -34,8 +43,10 @@ Implement VECTOR 2D:
         ☐ round
         ☐ roundToZero
         ☐ negate
-        ☐ dot
-        ☐ cross
+        ☐ dot product two vectors @started(24-03-21 21:39)
+            ✘ dot product two vectors with overloaded 'dot' operator @cancelled(24-03-21 22:37)
+        ☐ cross product of two vectors
+            ✘  product of two vectors with overloaded 'x' operator @cancelled(24-03-21 22:37)
         ☐ lengthSq
         ☐ len
         ☐ manhattanLength

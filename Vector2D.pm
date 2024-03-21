@@ -44,6 +44,9 @@ use overload
     '-' => sub {
         my ( $v0, $v1, $opt ) = @_;
         return $v0->subtract($v1);
+    },
+    '*' => sub {
+        return $_[0]->mul($_[1]);
     };
 #
 my $private_nearest_square = sub {
@@ -385,7 +388,6 @@ sub clone {
 }
 #
 
-
 =over
 
 =item - copy(@args)
@@ -406,6 +408,56 @@ sub copy {
         $ret = Vector2D->set( $_[0] , @{ $_[0]->{elems} } );
     }
     return $ret;
+}
+#
+=over
+
+=item - dot(@args)
+
+This method calculates the dot product of the two vectors.
+
+=back
+
+=cut
+sub dot {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", (caller(0))[3] unless (ref $_[1] eq __PACKAGE__);
+        croak "Error: invalid argument detected at pos 2 ", (caller(0))[3] unless (ref $_[2] eq __PACKAGE__);
+        return ( $_[1]->{elems}[0] * $_[2]->{elems}[0] +
+              $_[1]->{elems}[1] * $_[2]->{elems}[1] );
+    } else {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        return ( $_[0]->{elems}[0] * $_[1]->{elems}[0] +
+              $_[0]->{elems}[1] * $_[1]->{elems}[1] );
+    }
+    # return this[0] * v[0] + this[1] * v[1];
+}
+#
+=over
+
+=item - mul(@args)
+
+This method multiplies two vectors - common elements miltiplied - quite the same as dot product, but the result is not summed.
+
+=back
+
+=cut
+sub mul {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", (caller(0))[3] unless (ref $_[1] eq __PACKAGE__);
+        croak "Error: invalid argument detected at pos 2 ", (caller(0))[3] unless (ref $_[2] eq __PACKAGE__);
+        $_[1]->{elems}[0] *= $_[2]->{elems}[0];
+        $_[1]->{elems}[1] *= $_[2]->{elems}[1];
+        return $_[1];
+    } else {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        $_[0]->{elems}[0] *= $_[1]->{elems}[0];
+        $_[0]->{elems}[1] *= $_[1]->{elems}[1];
+        return $_[0];
+    }
+    # return this[0] * v[0] + this[1] * v[1];
 }
 #
 sub debug {
