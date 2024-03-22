@@ -19,34 +19,66 @@ use strict;
 use warnings;
 use Data::Dumper;
 use POSIX qw(ceil sqrt sin cos round floor);
-use Math::Trig qw(deg2rad rad2deg);
+use Math::Trig qw (:pi);
+use Math::Trig qw(deg2rad rad2deg acos);
+use List::Util qw(min max);
 use Carp;
 use Scalar::Util qw(looks_like_number);
 use constant MAXSIZE => 2;    # 1X2 vector X,Y
 use constant DEBUG => 0; # 1 uses DEBUG constants
+use constant PI => atan2(1, 1) * 4;
+# use constant PI => pi;
+# use constant PI => POSIX::M_PI;
+use constant HALF_PI => PI * .5;
+use constant TWO_PI => PI * 2;
 use FindBin;
 use lib "$FindBin::Bin";
 BEGIN {
     require Exporter;
+    # printf "PI: %.12e\n", PI;
+    # printf "PI: %.12e\n", pi;
+    # printf "PI: %.12e\n", (atan2(1,1) * 4);
 }
 our @ISA = qw(Exporter);
 our $VERSION = qw(1.0.0);
 our @EXPORT = qw(new);
-our @EXPORT_OK = qw(dim size debug);
+our @EXPORT_OK =
+  qw(dim size debug normalize_angle_degrees normalize_angle_radians);
 my $dim;
 my $size;
 # operator overloads
 use overload
     '+' => sub {
         my ( $v0, $v1, $opt ) = @_;
-        return $v0->add($v1);
+        # return $v0->add($v1);
+        my $ret = Vector2D->add($v0, $v1);
     },
     '-' => sub {
         my ( $v0, $v1, $opt ) = @_;
-        return $v0->subtract($v1);
+        return Vector2D->subtract($v0, $v1);;
     },
     '*' => sub {
-        return $_[0]->mul($_[1]);
+        my ( $v0, $v1, $opt ) = @_;
+        if (ref ($v0) eq ref($v1) and ref($v0) eq __PACKAGE__) {
+            return Vector2D->mul( $v0, $v1 );
+        } elsif (ref ($v0) eq __PACKAGE__ and defined $v1 and ref(\$v1) eq 'SCALAR') {
+            return Vector2D->smul($v0, $v1);
+        } elsif (ref (\$v0) eq 'SCALAR' and defined $v1 and ref($v1) eq __PACKAGE__) {
+            return Vector2D->smul($v1, $v0);
+        }
+        croak "Error: missing or invalid type of arguments detected";
+    },
+    '/' => sub {
+        my ( $v0, $v1, $opt ) = @_;
+        return Vector2D->div( $v0, $v1 );
+    },
+    'x' => sub {
+        my ( $v0, $v1, $opt ) = @_;
+        return Vector2D->cross($v0, $v1);
+    },
+    '.' => sub {
+        my ( $v0, $v1, $opt ) = @_;
+        return Vector2D->dot($v1, $opt);
     };
 #
 my $private_nearest_square = sub {
@@ -130,7 +162,7 @@ sub size {
 
 =over
 
-=item - set( $v0, $v1, $opt, $opt1 )
+=item - set( @args )
 
 This method sets the vector elements. Depending on the type of caller - Class or instance -
 the method will parse first three, or all arguments.
@@ -174,7 +206,7 @@ sub set {
 
 =over
 
-=item - add( $v0, $v1, $opt )
+=item - add( @args )
 
 See C<subtract> above.
 
@@ -212,7 +244,7 @@ sub add {
 
 =over
 
-=item - subtract($v0, $v1, $opt)
+=item - subtract(@args)
 
 Expects maximum 3 arguments. If all arguments set - the argument count equals 3, the first
 two will contain the references to the Vector2D instances.
@@ -254,7 +286,7 @@ sub subtract {
 
 =over
 
-=item - print($v0, $v1, $opt)
+=item - print(@args)
 
 If the caller is not an instance but Vector2D class, the last two
 arguments processed - $opt refers to the label text argument, this is
@@ -330,7 +362,7 @@ sub print {
 #
 =over
 
-=item - zero($v0, $v1)
+=item - zero([$arg])
 
 This method initializes the vector with 0s.
 
@@ -436,6 +468,30 @@ sub dot {
 #
 =over
 
+=item - cross(@args)
+
+This method returns the cross product of two Vector2D
+
+=back
+
+=cut
+sub cross {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid argument detected at pos 2 ", ( caller(0) )[3]
+          unless ( ref $_[2] eq __PACKAGE__ );
+        return ($_[1]->{elems}[0] * $_[2]->{elems}[1] - $_[1]->{elems}[1] * $_[2]->{elems}[0]);
+    } else {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        return ( $_[0]->{elems}[0] * $_[1]->{elems}[1] -
+              $_[0]->{elems}[1] * $_[1]->{elems}[0] );
+    }
+}
+#
+=over
+
 =item - mul(@args)
 
 This method multiplies two vectors - common elements miltiplied - quite the same as dot product, but the result is not summed.
@@ -473,24 +529,319 @@ sub div {
     unless (ref $_[0]) {
         croak "Error: invalid argument detected at pos 1 ", (caller(0))[3] unless (ref $_[1] eq __PACKAGE__);
         croak "Error: invalid argument detected at pos 2 ", (caller(0))[3] unless (ref $_[2] eq __PACKAGE__);
-        $_[1]->{elems}[0] *= $_[2]->{elems}[0];
-        $_[1]->{elems}[1] *= $_[2]->{elems}[1];
+        croak "Divide by zero is not allowed" unless $_[2]->{elems}[0] ne 0;
+        croak "Divide by zero is not allowed" unless $_[2]->{elems}[1] ne 0;
+        $_[1]->{elems}[0] *= (1 / $_[2]->{elems}[0]);
+        $_[1]->{elems}[1] *= (1 / $_[2]->{elems}[1]);
         return $_[1];
     } else {
         croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
           unless ( ref $_[1] eq __PACKAGE__ );
-        $_[0]->{elems}[0] *= $_[1]->{elems}[0];
-        $_[0]->{elems}[1] *= $_[1]->{elems}[1];
+        croak "Divide by zero is not allowed" unless $_[1]->{elems}[0] ne 0;
+        croak "Divide by zero is not allowed" unless $_[1]->{elems}[1] ne 0;
+        $_[0]->{elems}[0] *= (1 / $_[1]->{elems}[0]);
+        $_[0]->{elems}[1] *= (1 / $_[1]->{elems}[1]);
         return $_[0];
     }
     # return this[0] * v[0] + this[1] * v[1];
 }
 #
+=over
+
+=item - length([$arg])
+
+This method gives back the length of the vector - the distance of the vector end from the origo.
+
+=back
+
+=cut
+sub length {
+    unless(ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        return sqrt(($_[1]->{elems}[0]**2) + ($_[1]->{elems}[1]**2));
+    } else {
+        return sqrt( ( $_[0]->{elems}[0]**2 ) + ( $_[0]->{elems}[1]**2 ) );
+    }
+}
+#
+
+=over
+
+=item - lengthSq([$arg])
+
+This method gives back the length squared of the vector.
+
+=back
+
+=cut
+sub lengthSq {
+    unless(ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        return (($_[1]->{elems}[0]**2) + ($_[1]->{elems}[1]**2));
+    } else {
+        return ( ( $_[0]->{elems}[0]**2 ) + ( $_[0]->{elems}[1]**2 ) );
+    }
+}
+#
+=over
+
+=item - manhattanLength([$arg])
+
+This method calculates the vector's Manhattan length.
+
+=back
+=cut
+sub manhattanLength {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        return abs($_[1]->{elems}[0]) + abs($_[1]->{elems}[1]);
+    } else {
+        return abs($_[0]->{elems}[0]) + abs($_[0]->{elems}[1]);
+    }
+}
+#
+=over
+
+=item - negate([$arg])
+
+This method negates the vector.
+
+=back
+=cut
+sub negate {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        $_[1]->{elems}[0] = -$_[1]->{elems}[0];
+        $_[1]->{elems}[1] = -$_[1]->{elems}[1];
+        return $_[1];
+    } else {
+        $_[0]->{elems}[0] = -$_[0]->{elems}[0];
+        $_[0]->{elems}[1] = -$_[0]->{elems}[1];
+        return $_[0];
+    }
+}
+#
+=over
+
+=item - sdiv(@args)
+
+THis method returns the vector which elements were divided by scalar
+
+=back
+=cut
+sub sdiv {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        my $rv = Vector2D->new;
+        if (defined $_[1]) {
+            croak "Error: invalid argument type at pos 2: expected scalar ",
+              ( caller(0) )[3]
+              unless ( ref \$_[2] eq 'SCALAR' );
+            croak "Divide by zero is not allowed" unless $_[2] ne 0;
+            $rv->set($_[1]->{elems}[0] /= $_[2], $_[1]->{elems}[1] /= $_[2]);
+            return $rv;
+        }
+        $rv->set(@{$_[1]});
+        return $rv;
+    } else {
+        croak "Error: invalid argument type at pos 1: expected scalar ",
+          ( caller(0) )[3]
+          unless ( ref \$_[1] eq 'SCALAR' );
+        croak "Divide by zero is not allowed" unless $_[1] ne 0;
+        $_[0]->{elems}[0] /= $_[1];
+        $_[0]->{elems}[1] /= $_[1];
+        return $_[0];
+    }
+}
+#
+=over
+
+=item - smul(@args)
+
+THis method returns the vector which elements were multiplied by scalar
+
+=back
+=cut
+sub smul {
+    unless ( ref $_[0] ) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        my $rv = Vector2D->new;
+        if ( defined $_[1] ) {
+            croak "Error: invalid argument type at pos 2: expected scalar ",
+              ( caller(0) )[3]
+              unless ( ref \$_[2] eq 'SCALAR' );
+            $rv->set( $_[1]->{elems}[0] *= $_[2], $_[1]->{elems}[1] *= $_[2] );
+            return $rv;
+        }
+        $rv->set( @{ $_[1] } );
+        return $rv;
+    }
+    else {
+        croak "Error: invalid argument type at pos 1: expected scalar ",
+          ( caller(0) )[3]
+          unless ( ref \$_[1] eq 'SCALAR' );
+        $_[0]->{elems}[0] *= $_[1];
+        $_[0]->{elems}[1] *= $_[1];
+        return $_[0];
+    }
+}
+#
+=over
+
+=item - normalize([$arg])
+
+This method calculates the normalized vector - unit vector - from the original one.
+
+=back
+=cut
+sub normalize {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        my $vr = Vector2D->new;
+        return $vr->set(@{$_[1]->sdiv($_[1]->length)});
+    } else {
+        return $_[0] = $_[0]->sdiv($_[0]->length);
+    }
+}
+#
+=over
+
+=item - angle([$arg])
+
+This method calculates direction of the vector. X - heading right - represents North.
+
+=back
+=cut
+sub angle {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        return atan2($_[1]->{elems}[1], $_[1]->{elems}[0]);
+    } else {
+        return atan2( $_[0]->{elems}[1], $_[0]->{elems}[0] );
+    }
+}
+#
+=over
+
+=item - angleNU([$arg])
+
+This method calculates direction of the vector. Y - heading up - represents North.
+
+=back
+=cut
+sub angleNU {
+    unless (ref $_[0]) {
+        croak "Error: invalid argument detected at pos 1 ", ( caller(0) )[3]
+          unless ( ref $_[1] eq __PACKAGE__ );
+        return atan2( $_[1]->{elems}[1], - $_[1]->{elems}[0]) #- PI / 2;
+    } else {
+        return atan2( - $_[0]->{elems}[1], -$_[0]->{elems}[0] ) #- PI / 2;
+    }
+}
+#
+=over
+
+=item - angleTo(@args)
+
+This method calculates the direction between two vectors in 2D.
+
+=back
+=cut
+sub angleTo {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ", ( caller(0) )[3]
+          unless (defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ", ( caller(0) )[3]
+          unless (defined $_[1] and  ref $_[2] eq __PACKAGE__ );
+        my $denominator = sqrt( $_[1]->lengthSq * $_[2]->lengthSq );
+        if ( $denominator eq 0 ) {
+            return HALF_PI;
+        }
+        my $theta = $_[1]->dot( $_[2] ) / $denominator;
+
+        # // clamp, to handle numerical problems
+        return acos( clamp( $theta, -1, 1 ) );
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ", ( caller(0) )[3]
+        unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+
+        my $denominator = sqrt( $_[0]->lengthSq * $_[1]->lengthSq );
+        if ( $denominator eq 0 ) {
+            return HALF_PI
+        };
+        my $theta = $_[0]->dot($_[1]) / $denominator;
+        # // clamp, to handle numerical problems
+        return acos( clamp( $theta, -1, 1 ) );
+    }
+}
+#
+=over
+
+=item - angleToNU(@args)
+
+This method calculates the direction between two vectors in 2D - Y axis North up.
+
+=back
+=cut
+sub angleToNU {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ", ( caller(0) )[3]
+          unless (defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ", ( caller(0) )[3]
+          unless (defined $_[1] and  ref $_[2] eq __PACKAGE__ );
+        my $denominator = sqrt( $_[1]->lengthSq * $_[2]->lengthSq );
+        if ( $denominator eq 0 ) {
+            return HALF_PI;
+        }
+        my $theta = ($_[1]->dot( $_[2] ) / $denominator);
+
+        # // clamp, to handle numerical problems
+        return acos( clamp( $theta, -1, 1 ) );
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ", ( caller(0) )[3]
+        unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+
+        my $denominator = sqrt( $_[0]->lengthSq * $_[1]->lengthSq );
+        if ( $denominator eq 0 ) {
+            return HALF_PI
+        };
+        my $theta = ($_[0]->dot($_[1]) / $denominator);
+        # // clamp, to handle numerical problems
+        return acos( clamp( $theta, -1, 1 ) );
+    }
+}
+#
 sub debug {
     my ($line, $file, $msg) = @_;
-    printf "DEBUG::\"%s\" @ line %d in \"%s\".\n", length $msg ? $msg : "info", $line, $file;
+    printf "DEBUG::\"%s\" @ line %d in \"%s\".\n", defined $msg ? $msg : "info", $line, $file;
 };
+sub normalize_angle_degrees {
+    my ($angle) = @_;
+    croak "Error: missing argument", (caller(0))[3] unless defined $angle;
+    croak "Error: invalid argument detected at pos 1, expected SCALAR ", ( caller(0) )[3]
+      unless ( ref \$angle eq 'SCALAR' );
+    return  ($angle % 360 + 360) % 360;
+}
+sub normalize_angle_radians {
+    my ($angle) = @_;
+    croak "Error: missing argument", (caller(0))[3] unless defined $angle;
+    croak "Error: invalid argument detected at pos 1, expected SCALAR ", ( caller(0) )[3]
+      unless ( ref \$angle eq 'SCALAR' );
+    return  ($angle % (2 * PI) + (2 * PI)) % (2 * PI);
+}
+sub clamp {
+    my ( $value, $min, $max ) = @_;
+	return max( $min, min( $max, $value ) );
 
+}
 =head2 B<Misc methods>
 
 These methods extends the capabilities of the Vector2D package.
@@ -500,6 +851,18 @@ These methods extends the capabilities of the Vector2D package.
 =item - debug(__LINE__,__FILE__[,message])
 
 prints out debug information.
+
+=item - normalize_angle_degrees($angle_in_degrees)
+
+returns the angle in range 0 .. 360 degrees
+
+=item - normalize_angle_radians($angle_in_radians)
+
+returns the angle in range 0 .. 2 * PI radians
+
+=item clamo(min, max, value)
+
+This method returns clamp value - either min or max - which is closest to one of the limit.
 
 =back
 
