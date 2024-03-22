@@ -785,7 +785,7 @@ sub angleTo {
 #
 =over
 
-=item - angleToNU(@args)
+=item - angleToNU(@args) I<deprecated>
 
 This method calculates the direction between two vectors in 2D - Y axis North up.
 
@@ -860,9 +860,11 @@ returns the angle in range 0 .. 360 degrees
 
 returns the angle in range 0 .. 2 * PI radians
 
-=item clamo(min, max, value)
+=item clamp(min, max, value)
 
-This method returns clamp value - either min or max - which is closest to one of the limit.
+This method returns clamp value - in range 'min' .. 'max' -, or
+in case when the value is out of the range, then returns 'min' if value is below
+the minimum, or returns 'max' if the value is beyond the maximum.
 
 =back
 
