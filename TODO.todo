@@ -1,5 +1,61 @@
 ## VECTOR 2D/3D MATRIX 2D/3D/4D LIBRARY TODOs
 
+Implement MATRIX 4D:
+    ☐ Matrix4.pm
+    Details:
+        ☐ constructor
+        ☐ set
+        ☐ print
+        ☐ copy
+        ☐ clone
+        ☐ zero
+        ☐ random
+        ☐ equals
+        ☐ negate
+        ...
+
+Implement MATRIX 3D:
+    ☐ Matrix3.pm
+    Details:
+        ☐ constructor
+        ☐ set
+        ☐ print
+        ☐ copy
+        ☐ clone
+        ☐ zero
+        ☐ random
+        ☐ equals
+        ☐ negate
+        ...
+
+Implement MATRIX 2D:
+    ☐ Matrix2.pm
+    Details:
+        ☐ constructor
+        ☐ set
+        ☐ print
+        ☐ copy
+        ☐ clone
+        ☐ zero
+        ☐ random
+        ☐ equals
+        ☐ negate
+        ...
+
+Implement VECTOR 3D:
+    ☐ Vector3.pm
+    Details:
+        ☐ constructor
+        ☐ set
+        ☐ print
+        ☐ copy
+        ☐ clone
+        ☐ zero
+        ☐ random
+        ☐ equals
+        ☐ negate
+        ...
+
 Implement VECTOR 2D:
     ☐ Vector2.pm @started(24-03-21 09:00)
     Details:
