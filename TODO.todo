@@ -14,12 +14,11 @@ Implement VECTOR 2D:
             add overloaded '+-':
             ✔ + add two vectors with overloaded '+' operator @done(24-03-21 18:33)
             ✔ - subtract two vectors with overloaded '-' operator @done(24-03-21 18:35)
-        ☐ sadd add a scalar value to the vector
-        ☐ ssub subtract a scalar from vector
+        ✔ sadd add a scalar value to the vector @done(24-03-26 08:23)
+        ✔ ssub subtract a scalar from vector @done(24-03-26 08:23)
             overloaded '+-':
-            ☐ + scalar add to vector with overloaded '+' operator
-            ☐ - subtract scalar from vector with overloaded '-' operator
-        ☐ subVectors
+            ✘ + scalar add to vector with overloaded '+' operator @cancelled(24-03-26 08:23)
+            ✘ - subtract scalar from vector with overloaded '-' operator @cancelled(24-03-26 08:23)
         ✔ mul multiple two vectors - quite the same as dot product except no sum at the end @done(24-03-21 22:28)
             overload '*':
             ✔ overload '*' operator @done(24-03-21 22:31)
@@ -32,16 +31,16 @@ Implement VECTOR 2D:
         ✔ sdiv @done(24-03-22 22:36)
             overloaded '/':
             ✔ overload '/' operator for sdiv @done(24-03-22 22:36)
-        ☐ applyMatrix3
-        ☐ min
-        ☐ max
-        ☐ clamp
-        ☐ clampScalar
-        ☐ clampLength
-        ☐ floor
-        ☐ ceil
-        ☐ round
-        ☐ roundToZero
+        ☐ applyMatrix3 !!!TODO: after Matrix3 designed and developed !!!
+        ✔ vmin @started(24-03-26 08:24) @done(24-03-26 10:10) @lasted(1h46m24s)
+        ✔ vmax @started(24-03-26 08:24) @done(24-03-26 10:10) @lasted(1h46m25s)
+        ✔ vclamp @done(24-03-26 11:00)
+        ✔ clampScalar @done(24-03-26 11:40)
+        ✔ clampLength @started(24-03-26 11:41) @done(24-03-26 12:09) @lasted(28m9s)
+        ✔ vfloor @started(24-03-26 12:09) @done(24-03-26 12:21) @lasted(12m54s)
+        ✔ vceil @started(24-03-26 12:09) @done(24-03-26 12:23) @lasted(14m32s)
+        ✔ vround @started(24-03-26 12:09) @done(24-03-26 12:24) @lasted(15m46s)
+        ✔ vtruncate @started(24-03-26 12:24) @done(24-03-26 12:39) @lasted(15m42s)
         ✔ negate @done(24-03-22 20:48)
         ✔ dot product two vectors @started(24-03-21 21:39) @done(24-03-22 20:08) @lasted(22h29m48s)
             ✔ dot product two vectors with overloaded 'dot' operator @done(24-03-22 20:08)
@@ -54,16 +53,16 @@ Implement VECTOR 2D:
         ✔ angle @done(24-03-22 22:37)
         ✔ angleNU - angle north up @done(24-03-22 22:37)
         ✔ angleTo @done(24-03-22 23:19)
-        ☐ distanceTo
-        ☐ distanceToSquared
-        ☐ manhattanDistanceTo
-        ☐ setLength
-        ☐ lerp
-        ☐ lerpVectors
-        ☐ equals
-            overload '==':
-            ☐ checks if two vectors are equal using '==' operator
-        ☐ fromArray
-        ☐ toArray
-        ☐ rotateAround
-        ☐ random
+        ✔ distanceTo @done(24-03-26 15:40)
+        ✔ distanceToSquared @started(24-03-26 15:27) @done(24-03-26 15:40) @lasted(13m24s)
+        ✔ manhattanDistanceTo @started(24-03-26 15:40) @done(24-03-26 15:44) @lasted(4m39s)
+        ✔ setLength @started(24-03-26 15:44) @done(24-03-26 21:09) @lasted(5h25m8s)
+        ✔ lerp @started(24-03-26 15:44) @done(24-03-26 21:21) @lasted(5h37m43s)
+        ✔ lerpVectors @started(24-03-26 15:44) @done(24-03-26 21:31) @lasted(5h47m22s)
+        ✔ equals @started(24-03-26 15:44) @done(24-03-26 21:40) @lasted(5h56m29s)
+            overload '==' and '!=':
+            ✔ checks if two vectors are equal using '==' or '!=' operator @started(24-03-26 15:44) @done(24-03-26 21:46) @lasted(6h2m41s)
+        ✘ fromArray @started(24-03-26 15:44) @cancelled(24-03-26 21:46) @wasted(6h2m50s)
+        ✘ toArray @started(24-03-26 15:45) @cancelled(24-03-26 21:47) @wasted(6h2m2s)
+        ✔ rotateAround @started(24-03-26 15:45) @done(24-03-26 22:08) @lasted(6h23m3s)
+        ✔ random @started(24-03-26 15:45) @done(24-03-26 22:08) @lasted(6h23m4s)

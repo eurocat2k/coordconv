@@ -55,7 +55,7 @@
 .\" ========================================================================
 .\"
 .IX Title ".::Vector2D 3"
-.TH .::Vector2D 3 2024-03-22 "perl v5.38.2" "User Contributed Perl Documentation"
+.TH .::Vector2D 3 2024-03-26 "perl v5.38.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -90,6 +90,12 @@ If caller is an instance, \f(CW$1\fR and \f(CW$opt\fR will be used to set vector
 .el .IP "\- add( \f(CW@args\fR )" 4
 .IX Item "- add( @args )"
 See \f(CW\*(C`subtract\*(C'\fR above.
+.IP sadd(@args) 4
+.IX Item "sadd(@args)"
+This method adds a scalar value to the vector's each elements.
+.IP ssub(@args) 4
+.IX Item "ssub(@args)"
+This method decrements the vector's each elements by a scalar value.
 .IP "\- subtract(@args)" 4
 .IX Item "- subtract(@args)"
 Expects maximum 3 arguments. If all arguments set \- the argument count equals 3, the first

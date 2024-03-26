@@ -78,7 +78,13 @@ use overload
     },
     '.' => sub {
         my ( $v0, $v1, $opt ) = @_;
-        return Vector2D->dot($v1, $opt);
+        return Vector2D->dot($v0, $v1);
+    },
+    '==' => sub {
+        return Vector2D->dot($_[0], $_[1]);
+    },
+    '!=' => sub {
+        return not Vector2D->dot($_[0], $_[1]);
     };
 #
 my $private_nearest_square = sub {
@@ -239,6 +245,72 @@ sub add {
             return $vr;
         }
     }
+}
+#
+
+=over
+
+=item sadd(@args)
+
+This method adds a scalar value to the vector's each elements.
+
+=back
+
+=cut
+sub sadd {
+    my $ret;
+    unless (ref $_[0]) {
+        # static
+        croak "Error: 1st argument type is not ".__PACKAGE__."\n", (caller(0))[3] if (ref($_[1]) ne __PACKAGE__);
+        croak "Error: missing or invalid type of 2nd argument", ( caller(0) )[3]
+          if (not defined $_[2] or ref( \$_[2] ) ne 'SCALAR' );
+        $ret = Vector2D->new();
+        for ( 0 .. MAXSIZE- 1 ) {
+            $ret->{elems}[$_] = $_[1]->{elems}[$_] + $_[2];
+        }
+    } else {
+        # instance
+        croak "Error: missing or invalid type of 2nd argument", ( caller(0) )[3]
+          if (not defined $_[1] or ref( \$_[1] ) ne 'SCALAR' );
+        $ret = Vector2D->new();
+        for ( 0 .. MAXSIZE- 1 ) {
+            $ret->{elems}[$_] = $_[0]->{elems}[$_] + $_[1];
+        }
+    }
+    return $ret;
+}
+#
+
+=over
+
+=item ssub(@args)
+
+This method decrements the vector's each elements by a scalar value.
+
+=back
+
+=cut
+sub ssub {
+    my $ret;
+    unless (ref $_[0]) {
+        # static
+        croak "Error: 1st argument type is not ".__PACKAGE__."\n", (caller(0))[3] if (ref($_[1]) ne __PACKAGE__);
+        croak "Error: missing or invalid type of 2nd argument", ( caller(0) )[3]
+          if (not defined $_[2] or ref( \$_[2] ) ne 'SCALAR' );
+        $ret = Vector2D->new();
+        for (0..MAXSIZE-1) {
+            $ret->{elems}[$_] = $_[1]->{elems}[$_] - $_[2];
+        }
+    } else {
+        # instance
+        croak "Error: missing or invalid type of 2nd argument", ( caller(0) )[3]
+          if (not defined $_[1] or ref( \$_[1] ) ne 'SCALAR' );
+        $ret = Vector2D->new();
+        for (0..MAXSIZE-1) {
+            $ret->{elems}[$_] = $_[0]->{elems}[$_] - $_[1];
+        }
+    }
+    return $ret;
 }
 #
 
@@ -819,6 +891,612 @@ sub angleToNU {
     }
 }
 #
+=over
+
+=item vmin(@args)
+
+This method compares two vectors - at each element index - and returns with a new vector containing the minimum values from the original vectors.
+
+=back
+=cut
+sub vmin {
+    my $ret;
+    unless(ref $_[0]) {
+        # static
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        $ret = Vector2D->new;
+        for (0..MAXSIZE-1) {
+            $ret->{elems}[$_] = min( $_[1]->{elems}[$_], $_[2]->{elems}[$_] );
+        }
+    } else {
+        # instance
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        $ret = $_[0];
+        for ( 0 .. MAXSIZE- 1 ) {
+            $ret->{elems}[$_] = min( $_[0]->{elems}[$_], $_[1]->{elems}[$_] );
+        }
+    }
+    return $ret;
+}
+#
+=over
+
+=item vmax(@args)
+
+This method compares two vectors - at each element index - and returns with a new vector containing the maximum values from the original vectors.
+
+=back
+=cut
+sub vmax {
+    my $ret;
+    unless ( ref $_[0] ) {
+
+        # static
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        $ret = Vector2D->new;
+        for ( 0 .. MAXSIZE- 1 ) {
+            $ret->{elems}[$_] = max( $_[1]->{elems}[$_], $_[2]->{elems}[$_] );
+        }
+    }
+    else {
+        # instance
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        $ret = $_[0];
+        for ( 0 .. MAXSIZE- 1 ) {
+            $ret->{elems}[$_] = max( $_[0]->{elems}[$_], $_[1]->{elems}[$_] );
+        }
+    }
+    return $ret;
+}
+#
+=over
+
+=item vclamp(@args)
+
+This method 'clamps-down' - or restrict in terms of its element values of the left most vector
+(the instance itself, or in case the static call, the very first vector) between the limits
+set by the next two vectors. Simplified: keeps vector in range between the other two as limits.
+
+=back
+=cut
+sub vclamp {
+    my $ret;
+    unless(ref $_[0]) {
+        # static
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 3 ",
+          ( caller(0) )[3]
+          unless ( defined $_[3] and ref $_[3] eq __PACKAGE__ );
+        $ret = $_[1];
+        my @min = @{$_[2]->{elems}};
+        my @max = @{$_[3]->{elems}};
+        $ret->{elems}[0] = max( $min[0], min( $max[0], $ret->{elems}[0] ) );
+        $ret->{elems}[1] = max( $min[1], min( $max[1], $ret->{elems}[1] ) );
+    } else {
+        # instance
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        # destructive
+        $ret = $_[0];
+        my @min = @{$_[1]->{elems}};
+        my @max = @{$_[2]->{elems}};
+        $ret->{elems}[0] = max( $min[0], min( $max[0], $ret->{elems}[0] ) );
+        $ret->{elems}[1] = max( $min[1], min( $max[1], $ret->{elems}[1] ) );
+    }
+    return $ret;
+}
+#
+=over
+
+=item clampScalar(@args)
+
+This method returns a vector which elements value restricted to be in the range defined by the next two scalar values.
+
+=back
+=cut
+sub clampScalar {
+    my $ret;
+    unless (ref $_[0]) {
+        # static
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref \$_[2] eq 'SCALAR' );
+        croak "Error: invalid or missing argument detected at pos 3 ",
+          ( caller(0) )[3]
+          unless ( defined $_[3] and ref \$_[3] eq 'SCALAR' );
+        # print Dumper{
+        #     ret => $_[1],
+        #     min => $_[2],
+        #     max => $_[3]
+        # };
+        $ret = $_[1];
+        my $min = $_[2];
+        my $max = $_[3];;
+        $ret->{elems}[0] = max($min, min($max, $ret->{elems}[0]));
+        $ret->{elems}[1] = max($min, min($max, $ret->{elems}[1]));
+    } else {
+        # instance
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref \$_[1] eq 'SCALAR' );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref \$_[2] eq 'SCALAR' );
+        $ret = $_[0];
+        my $min = $_[1];
+        my $max = $_[2];
+        $ret->{elems}[0] = max($min, min($max, $ret->{elems}[0]));
+        $ret->{elems}[1] = max($min, min($max, $ret->{elems}[1]));
+    }
+    return $ret;
+}
+#
+=over
+
+=item clampLength(@args)
+
+This method calculates the clamped length of the vector between the range minimum and maximum values.
+
+=back
+=cut
+sub clampLength {
+    unless (ref $_[0]) {
+        # static call
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref \$_[2] eq 'SCALAR' );
+        croak "Error: invalid or missing argument detected at pos 3 ",
+          ( caller(0) )[3]
+          unless ( defined $_[3] and ref \$_[3] eq 'SCALAR' );
+        my $length = $_[1]->length;
+        my $min = $_[2];
+        my $max = $_[3];
+        return $_[1]->sdiv($length || 1)->smul(max($min, min($max, $length)));
+    } else {
+        # instance call
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref \$_[1] eq 'SCALAR' );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref \$_[2] eq 'SCALAR' );
+        my $length = $_[0]->length;
+        my $min = $_[1];
+        my $max = $_[2];
+        $length = 1 unless ($length ne 0);
+        return $_[0]->sdiv( $length )->smul( max( $min, min( $max, $length ) ) );
+    }
+}
+#
+=over
+
+=item vfloor([$arg])
+
+This method rounds down the vector's elements to the nearest integer
+
+=back
+=cut
+sub vfloor {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        my $ret = $_[1];
+        $ret->{elems}[0] = floor($_[1]->{elems}[0]);
+        $ret->{elems}[1] = floor($_[1]->{elems}[1]);
+        return $ret;
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[0] and ref $_[0] eq __PACKAGE__ );
+        my $ret = $_[0];
+        $ret->{elems}[0] = floor($_[0]->{elems}[0]);
+        $ret->{elems}[1] = floor($_[0]->{elems}[1]);
+        return $ret;
+    }
+}
+#
+=over
+
+=item vceil([$arg])
+
+This method rounds up the vector's elements to the nearest integer
+
+=back
+=cut
+sub vceil {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        my $ret = $_[1];
+        $ret->{elems}[0] = ceil($_[1]->{elems}[0]);
+        $ret->{elems}[1] = ceil($_[1]->{elems}[1]);
+        return $ret;
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[0] and ref $_[0] eq __PACKAGE__ );
+        my $ret = $_[0];
+        $ret->{elems}[0] = ceil($_[0]->{elems}[0]);
+        $ret->{elems}[1] = ceil($_[0]->{elems}[1]);
+        return $ret;
+    }
+}
+#
+=over
+
+=item vround([$arg])
+
+This method rounds the vector's elements to the nearest integer
+
+=back
+=cut
+sub vround {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        my $ret = $_[1];
+        $ret->{elems}[0] = round($_[1]->{elems}[0]);
+        $ret->{elems}[1] = round($_[1]->{elems}[1]);
+        return $ret;
+    } else {
+        my $ret = $_[0];
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[0] and ref $_[0] eq __PACKAGE__ );
+        $ret->{elems}[0] = round($_[0]->{elems}[0]);
+        $ret->{elems}[1] = round($_[0]->{elems}[1]);
+        return $ret;
+    }
+}
+#
+=over
+
+=item vtruncate([$arg])
+
+This method modifies the vetor elements setting each of its integer part value. This method
+does not apply any kind of mathematical rounding, simply cuts off the decimal part - if any -
+from vector element at index.
+
+=back
+=cut
+sub vtruncate {
+    unless (ref $_[0]) {
+        # static call
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        $_[1]->{elems}[0] = int( $_[1]->{elems}[0] );
+        $_[1]->{elems}[1] = int( $_[1]->{elems}[1] );
+        return $_[1];
+    } static {
+        # instance call
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[0] and ref $_[0] eq __PACKAGE__ );
+        $_[0]->{elems}[0] = int( $_[0]->{elems}[0] );
+        $_[0]->{elems}[1] = int( $_[0]->{elems}[1] );
+        return $_[0];
+    }
+}
+#
+=over
+
+=item distanceToSquared(@args)
+
+This method calculates the squared distance between two vectors
+
+=back
+=cut
+sub distanceToSquared {
+    unless (ref $_{0}) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        my ( $dx, $dy );
+        $dx = $_[2]->{elems}[0] - $_[1]->{elems}[0];
+        $dy = $_[2]->{elems}[1] - $_[1]->{elems}[1];
+        return $dx ** 2 + $dy ** 2;
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        my ( $dx, $dy );
+        $dx = $_[1]->{elems}[0] - $_[0]->{elems}[0];
+        $dy = $_[1]->{elems}[1] - $_[0]->{elems}[1];
+        return $dx**2 + $dy**2;
+	}
+}
+=over
+
+=item distanceTo(@args)
+
+This method calculates the distance between two vectors
+
+=back
+=cut
+sub distanceTo {
+    unless ( ref $_{0} ) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        return sqrt(Vector2D->distanceToSquared($_[1], $_[2]));
+    }
+    else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        return sqrt( Vector2D->distanceToSquared( $_[0], $_[1] ) );
+    }
+}
+#
+=over
+
+=item manhattanDistanceTo(@args)
+
+Calculates Manhattan distance between two vectors.
+
+=back
+=cut
+sub manhattanDistanceTo {
+    unless ( ref $_{0} ) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        return abs($_[1]->{elems}[0] - $_[2]->{elems}[0]) + abs($_[1]->{elems}[1] - $_[2]->{elems}[1]);
+    }
+    else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        return
+          abs( $_[0]->{elems}[0] - $_[1]->{elems}[0] ) +
+          abs( $_[0]->{elems}[1] - $_[1]->{elems}[1] );
+    }
+}
+#
+=over
+
+=item setLength(arg)
+
+This method returns a modified length of the original vector
+
+=back
+=cut
+#
+sub setLength {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref \$_[2] eq 'SCALAR' );
+        return $_[1]->normalize->smul($_[2]);
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref \$_[1] eq 'SCALAR' );
+        return $_[0]->normalize->smul($_[1]);
+    }
+}
+#
+=over
+
+=item vlerp(@args)
+
+This method calculates the linear extrapolated vector based on a given scalar value.
+
+=back
+=cut
+sub vlerp {
+    unless ( ref $_[0] ) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[3] and ref \$_[3] eq 'SCALAR' );
+        $_[1]->{elems}[0] = ($_[2]->{elems}[0] - $_[1]->{elems}[0]) * $_[3];
+        $_[1]->{elems}[1] = ($_[2]->{elems}[1] - $_[1]->{elems}[1]) * $_[3];
+        return $_[1];
+    }
+    else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[2] and ref \$_[2] eq 'SCALAR' );
+        $_[0]->{elems}[0] = ($_[1]->{elems}[0] - $_[0]->{elems}[0]) * $_[2];
+        $_[0]->{elems}[1] = ($_[1]->{elems}[1] - $_[0]->{elems}[1]) * $_[2];
+        return $_[0];
+    }
+}
+#
+=over
+
+=item vlerpVectors(@args)
+
+This method calculates the lerp vector of three vectors and a scalar
+
+=back
+=cut
+sub lerpVectors {
+    unless (ref $_[0]) {
+        # expects four arguments, three vectors and one scalar
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[3] and ref $_[3] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[4] and ref \$_[4] eq 'SCALAR' );
+
+        $_[1]->{elems}[0] = $_[2]->{elems}[0] +
+          ( $_[3]->{elems}[0] - $_[2]->{elems}[0] ) * $_[4];
+        $_[1]->{elems}[1] = $_[2]->{elems}[1] +
+          ( $_[3]->{elems}[1] - $_[2]->{elems}[1] ) * $_[4];
+        return $_[1];
+    } else {
+        # expects three arguments, two vectors and one scalar
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[3] and ref \$_[3] eq 'SCALAR' );
+        $_[0]->{elems}[0] = $_[1]->{elems}[0] +
+          ( $_[2]->{elems}[0] - $_[1]->{elems}[0] ) * $_[3];
+        $_[0]->{elems}[0] = $_[1]->{elems}[1] +
+          ( $_[2]->{elems}[1] - $_[1]->{elems}[1] ) * $_[3];
+        return $_[1];
+    }
+}
+#
+=over
+
+=item equals(@args)
+
+Checks wether two vectors equal or not.
+
+=back
+=cut
+sub equals {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        return (($_[1]->{elems}[0] eq $_[2]->{elems}[0]) and ($_[1]->{elems}[1] eq $_[2]->{elems}[1]));
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        return (($_[0]->{elems}[0] eq $_[1]->{elems}[0]) and ($_[0]->{elems}[1] eq $_[1]->{elems}[1]));
+    }
+}
+#
+=over
+
+=item rotateAround(@args)
+
+This method rotates the original vector around another vector by angle.
+
+=back
+=cut
+sub rotateAround {
+    my ( $c, $s, $x, $y );
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref $_[2] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 3 ",
+          ( caller(0) )[3]
+          unless ( defined $_[3] and ref \$_[3] eq 'SCALAR' );
+        $c = cos(deg2rad($_[3]));
+        $s = sin(deg2rad($_[3]));
+        $x = $_[2]->{elems}[0] - $_[1]->{elems}[0];
+        $y = $_[2]->{elems}[1] - $_[1]->{elems}[1];
+        $_[1]->{elems}[0] = $x * $c - $y * $s + $_[2]->{elems}[0];
+        $_[1]->{elems}[1] = $x * $s + $y * $c + $_[2]->{elems}[1];
+        return $_[1];
+    } else {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+          ( caller(0) )[3]
+          unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        croak "Error: invalid or missing argument detected at pos 2 ",
+          ( caller(0) )[3]
+          unless ( defined $_[2] and ref \$_[2] eq 'SCALAR' );
+        $c = cos(deg2rad($_[2]));
+        $s = sin(deg2rad($_[2]));
+        $x = $_[1]->{elems}[0] - $_[0]->{elems}[0];
+        $y = $_[1]->{elems}[1] - $_[0]->{elems}[1];
+        $_[0]->{elems}[0] = $x * $c - $y * $s + $_[1]->{elems}[0];
+        $_[0]->{elems}[1] = $x * $s + $y * $c + $_[1]->{elems}[1];
+        return $_[0];
+    }
+}
+=over
+
+=item random()
+
+This method generates random valued vector.
+
+=back
+=cut
+sub random {
+    unless (ref $_[0]) {
+        croak "Error: invalid or missing argument detected at pos 1 ",
+            ( caller(0) )[3]
+            unless ( defined $_[1] and ref $_[1] eq __PACKAGE__ );
+        $_[1]->{elems}[0] = rand();
+        $_[1]->{elems}[1] = rand();
+        return $_[1];
+    } else {
+        $_[0]->{elems}[0] = rand();
+        $_[0]->{elems}[1] = rand();
+        return $_[0];
+    }
+}
+#
+# Utilities
 sub debug {
     my ($line, $file, $msg) = @_;
     printf "DEBUG::\"%s\" @ line %d in \"%s\".\n", defined $msg ? $msg : "info", $line, $file;
