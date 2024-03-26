@@ -1,16 +1,16 @@
-package Matrix3D;
+package Matrix4D;
 
 =head1 NAME
 
-Matrix3D
+Matrix4D
 
 =head1 SYNOPSYS
 
-use Matrix3D;
+use Matrix4D;
 
-my $vector = Matrix3D->new();
+my $vector = Matrix4D->new();
 
-my $vector = Matrix3D->new(1, 2, 3, 4, 5, 6, 7, 8, 9);
+my $vector = Matrix4D->new(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
 
 =cut
 

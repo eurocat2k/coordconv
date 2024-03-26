@@ -1,16 +1,16 @@
-package Matrix3D;
+package Quaternion;
 
 =head1 NAME
 
-Matrix3D
+Quaternion
 
 =head1 SYNOPSYS
 
-use Matrix3D;
+use Quaternion;
 
-my $vector = Matrix3D->new();
+my $vector = Quaternion->new();
 
-my $vector = Matrix3D->new(1, 2, 3, 4, 5, 6, 7, 8, 9);
+my $vector = Quaternion->new(1, 2, 3);
 
 =cut
 
@@ -36,6 +36,7 @@ use FindBin;
 use lib "$FindBin::Bin";
 
 BEGIN {
+    use Vector4D;
     require Exporter;
 
     # printf "PI: %.12e\n", PI;
