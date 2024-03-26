@@ -42,6 +42,20 @@ Implement MATRIX 2D:
         ☐ negate
         ...
 
+Implement VECTOR 4D:
+    ☐ Vector4.pm
+    Details:
+        ☐ constructor
+        ☐ set
+        ☐ print
+        ☐ copy
+        ☐ clone
+        ☐ zero
+        ☐ random
+        ☐ equals
+        ☐ negate
+        ...
+
 Implement VECTOR 3D:
     ☐ Vector3.pm
     Details:
@@ -54,6 +68,13 @@ Implement VECTOR 3D:
         ☐ random
         ☐ equals
         ☐ negate
+        ...
+
+
+Implement QUATERNION:
+    ☐ Quaternion.pm
+    Details:
+        ☐ constructor
         ...
 
 Implement VECTOR 2D:
