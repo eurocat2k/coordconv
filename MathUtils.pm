@@ -69,13 +69,16 @@ our @EXPORT  = qw(
     randFloatSpread
     ceilPowerOfTwo
     floorPowerOfTwo
+    isPowerOfTwo
     setQuaternionFromProperEuler
     isWithin
     roundNearest
     LN2
-    LUT
+    PI
+    HALF_PI
+    TWO_PI
 );
-our @EXPORT_OK = qw(debug);
+our @EXPORT_OK = qw(debug LUT);
 
 sub roundNearest($$) {
     my ($v, $m) = @_;
@@ -151,8 +154,8 @@ sub ceilPowerOfTwo ($) {
 }
 
 sub isPowerOfTwo ($) {
-    # my ($value) = @_;
-    # return (( hex($value) & ( hex($value - 1) ) ) eq 0) and (hex($value) ne 0);
+    my ($v) = @_;
+    return ( ( ( $v & ( $v - 1 ) ) eq 0 ) and $v ne 0 );
 }
 
 sub randFloatSpread ($)  {

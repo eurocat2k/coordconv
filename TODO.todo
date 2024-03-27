@@ -47,35 +47,204 @@ Implement VECTOR 4D:
     Details:
         ☐ constructor
         ☐ set
+        ☐ get
+        ☐ X setter/getter
+        ☐ Y setter/getter
+        ☐ Z setter/getter
+        ☐ W setter/getter
         ☐ print
-        ☐ copy
-        ☐ clone
         ☐ zero
         ☐ random
         ☐ equals
         ☐ negate
-        ...
+        ☐ setScalar
+        ☐ setComponent
+        ☐ getComponent
+        ☐ clone
+        ☐ copy
+        ☐ add
+        ☐ addScalar
+        ☐ addVectors
+        ☐ addScaledVector
+        ☐ sub
+        ☐ subScalar
+        ☐ subVectors
+        ☐ multiply
+        ☐ multiplyScalar
+        ☐ applyMatrix4
+        ☐ divideScalar
+        ☐ setAxisAngleFromQuaternion
+        ☐ setAxisAngleFromRotationMatrix
+        ☐ min
+        ☐ max
+        ☐ clamp
+        ☐ clampScalar
+        ☐ clampLength
+        ☐ floor
+        ☐ ceil
+        ☐ round
+        ☐ roundToZero
+        ☐ negate
+        ☐ dot
+        ☐ lengthSq
+        ☐ length
+        ☐ manhattanLength
+        ☐ normalize
+        ☐ setLength
+        ☐ lerp
+        ☐ lerpVectors
+        ☐ equals
+        ☐ fromArray
+        ☐ toArray
+        ☐ fromBufferAttribute
+        ☐ random
 
 Implement VECTOR 3D:
     ☐ Vector3.pm
     Details:
         ☐ constructor
         ☐ set
-        ☐ print
-        ☐ copy
+        ☐ get
+        ☐ X get/set
+        ☐ Y get/set
+        ☐ Z get/set
+        ☐ setScalar
+        ☐ setComponent
+        ☐ getComponent
         ☐ clone
-        ☐ zero
-        ☐ random
-        ☐ equals
+        ☐ copy
+        ☐ add
+        ☐ addScalar
+        ☐ addVectors
+        ☐ addScaledVector
+        ☐ sub
+        ☐ subScalar
+        ☐ subVectors
+        ☐ multiply
+        ☐ multiplyScalar
+        ☐ multiplyVectors
+        ☐ applyEuler
+        ☐ applyAxisAngle
+        ☐ applyMatrix3
+        ☐ applyNormalMatrix
+        ☐ applyMatrix4
+        ☐ applyQuaternion
+        ☐ project
+        ☐ unproject
+        ☐ transformDirection
+        ☐ divide
+        ☐ divideScalar
+        ☐ min
+        ☐ max
+        ☐ clamp
+        ☐ clampScalar
+        ☐ clampLength
+        ☐ floor
+        ☐ ceil
+        ☐ round
+        ☐ roundToZero
         ☐ negate
-        ...
-
+        ☐ dot
+        ☐ lengthSq
+        ☐ length
+        ☐ manhattanLength
+        ☐ normalize
+        ☐ setLength
+        ☐ lerp
+        ☐ lerpVectors
+        ☐ cross
+        ☐ crossVectors
+        ☐ projectOnVector
+        ☐ projectOnPlane
+        ☐ reflect
+        ☐ angleTo
+        ☐ distanceTo
+        ☐ distanceToSquared
+        ☐ manhattanDistanceTo
+        ☐ setFromSpherical
+        ☐ setFromSphericalCoords
+        ☐ setFromCylindrical
+        ☐ setFromCylindricalCoords
+        ☐ setFromMatrixPosition
+        ☐ setFromMatrixScale
+        ☐ setFromMatrixColumn
+        ☐ setFromMatrix3Column
+        ☐ setFromEuler
+        ☐ setFromColor
+        ☐ equals
+        ☐ fromArray
+        ☐ toArray
+        ☐ fromBufferAttribute
+        ☐ random
+        ☐ randomDirection
 
 Implement QUATERNION:
     ☐ Quaternion.pm
     Details:
-        ☐ constructor
-        ...
+        ✔ constructor @done(24-03-27 13:36)
+        ✔ destructor @done(24-03-27 13:38)
+        ✔ set @done(24-03-27 13:36)
+        ✔ get @done(24-03-27 13:36)
+        ✔ ID get quertnion instance id @done(24-03-27 13:38)
+        ✔ print @done(24-03-27 13:37)
+        ✔ X get/set @done(24-03-27 13:37)
+        ✔ Y get/set @done(24-03-27 13:37)
+        ✔ Z get/set @done(24-03-27 13:37)
+        ✔ W get/set @done(24-03-27 13:37)
+        ✔ clone @done(24-03-27 13:39)
+        ✔ copy @done(24-03-27 13:39)
+        ☐ setFromEuler
+        ☐ setFromAxisAngle
+        ☐ setFromRotationMatrix
+        ☐ setFromUnitVectors
+        ☐ angleTo
+        ☐ rotateTowards
+        ☐ identity
+        ☐ invert
+        ☐ conjugate
+        ☐ dot
+        ☐ lengthSq
+        ☐ length
+        ☐ normalize
+        ☐ multiply
+        ☐ premultiply
+        ☐ multiplyQuaternions
+        ☐ slerp
+        ☐ slerpQuaternions
+        ☐ random()
+        ☐ equals
+        ☐ fromArray
+        ☐ toArray
+        ☐ fromBufferAttribute
+        ☐ toJSON
+
+Implement MathUtils:
+    ☐ MathUtils.pm @started(24-03-27 11:30)
+    Details:
+        ✔ smoothstep @done(24-03-27 11:31)
+        ✔ euclideanModulo @done(24-03-27 11:31)
+        ✔ pingpong @done(24-03-27 11:31)
+        ✔ generateUUID @done(24-03-27 11:31)
+        ✔ euclideanModulo @done(24-03-27 11:31)
+        ✔ damp @done(24-03-27 11:31)
+        ✔ mapLinear @done(24-03-27 11:31)
+        ✔ inverseLerp @done(24-03-27 11:31)
+        ✔ lerp @done(24-03-27 11:31)
+        ✔ nearest_square @done(24-03-27 11:31)
+        ✔ nearest_square_root @done(24-03-27 11:31)
+        ✔ normalize_angle_degrees @done(24-03-27 11:31)
+        ✔ normalize_angle_radians @done(24-03-27 11:31)
+        ✔ clamp @done(24-03-27 11:31)
+        ✔ smootherstep @done(24-03-27 11:31)
+        ✔ randInt @done(24-03-27 11:31)
+        ✔ randFloat @done(24-03-27 11:31)
+        ✔ randFloatSpread @done(24-03-27 11:31)
+        ✔ ceilPowerOfTwod @done(24-03-27 11:31)
+        ✔ floorPowerOfTwo @done(24-03-27 11:31)
+        ✔ isPowerOfTwo @done(24-03-27 11:31)
+        ☐ setQuaternionFromProperEuler
+        ✔ isWithin @done(24-03-27 11:31)
+        ✔ roundNearest @done(24-03-27 11:31)
 
 Implement VECTOR 2D:
     ☐ Vector2.pm @started(24-03-21 09:00)

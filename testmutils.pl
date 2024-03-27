@@ -15,3 +15,5 @@ printf "damp 2, 13, .85, 60 = %f\n", damp( 2, 13, .15, 60 );
 printf "lerp -5, 17, .125 = %f\n", lerp( -5, 17, .125 );
 
 printf "uuid = %s\n", generateUUID();
+
+printf "is power of two: %d? %s\n", 16, isPowerOfTwo(16) ? "YES" : "NO";
