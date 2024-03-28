@@ -183,7 +183,7 @@ Implement QUATERNION:
     Details:
         ✔ constructor @done(24-03-27 13:36)
         ✔ destructor @done(24-03-27 13:38)
-        ✔ set @done(24-03-27 13:36)
+        ✔ set @done(24-03-28 11:03)
         ✔ get @done(24-03-27 13:36)
         ✔ ID get quertnion instance id @done(24-03-27 13:38)
         ✔ print @done(24-03-27 13:37)
@@ -193,7 +193,7 @@ Implement QUATERNION:
         ✔ W get/set @done(24-03-27 13:37)
         ✔ clone @done(24-03-27 13:39)
         ✔ copy @done(24-03-27 13:39)
-        ☐ setFromEuler
+        ☐ setFromEuler @started(24-03-28 09:24)
         ☐ setFromAxisAngle
         ☐ setFromRotationMatrix
         ☐ setFromUnitVectors
@@ -212,7 +212,9 @@ Implement QUATERNION:
         ☐ slerp
         ☐ slerpQuaternions
         ☐ random()
-        ☐ equals
+        ✔ equals @done(24-03-28 11:04)
+            overloaded '==':
+            ✔ @done(24-03-28 11:04)
         ☐ fromArray
         ☐ toArray
         ☐ fromBufferAttribute
